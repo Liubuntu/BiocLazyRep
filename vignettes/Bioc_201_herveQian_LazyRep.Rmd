@@ -32,11 +32,53 @@ options(showTailLines=3)
 
 # Lazy Representations of Very Large Genomic Data Resources in R/Bioconductor
 
-## Introduction
+## Instructors and contact information
 
-TODO: Provide a quick description of the workshop with pre-requisites, goals, time outline, etc...
+- **Hervé Pagès**, Fred Hutchinson Cancer Research Center, Seattle, WA
+- **Qian Liu**, Roswell Park Comprehensive Cancer Center, Buffalo, NY
+- **Martin Morgan**, Roswell Park Comprehensive Cancer Center, Buffalo, NY
 
-Load the R/_Bioconductor_ packages used in this workshop:
+## Workshop Description
+
+In this workshop, we will learn the lazy representations and
+interfaces in _R/Bioconductor_, as well as the application in the real
+data analysis. We will use some real data examples generated from
+DNA/RNA-seq, to demonstrate the representation and comprehension of
+large scale (out-of-memory) genomic datasets. The workshop will be
+mainly instructor-led live demo with completely working
+examples. Instructions and notes will be included.
+
+## Pre-requisites
+
+- Basic knowledge of R syntax
+- Knowledge of the `DelayedArray` class
+- Familiarity with `SummarizedExperiment` class
+
+## Workshop Participation
+
+Students will be using their laptops with internet connection, follow
+the instructor to read course materials and run through the working
+code chunks.
+
+## Time outline
+
+Activity | Time 
+---------|------
+DelayedArray and about   | 50m  (**to be modified by Hervé**)
+Specialized DelayedArray backends | 10m
+DelayedDataFrame | 10m 
+VariantExperiment & examples | 20m
+SQLDataFrame & examples (BigQuery??)| 10m
+|
+
+## Learning objectives
+- Create DelayedArray with different backends (**to be modified by Hervé**)
+- Analyze variant data using `VariantExperiment`
+- Create SQLDataFrame from SQL database table on local disk or web resources (e.g., BigQuery)
+
+##  _R/Bioconductor_ packages 
+
+to-be-used in this workshop:
 
 ```{r setup, message = FALSE}
 library(DelayedArray)
@@ -255,14 +297,11 @@ be found [here](https://www.biostat.washington.edu/sites/default/files/modules/G
 
 The GDS file inside R is using hierarchical structure: 
 
-```{r, GDS}
+```{r, GDSopen}
 file <- seqExampleFileName("gds")
 g1 <- gdsfmt::openfn.gds(file)
 g1
-closefn.gds(g1)
 ```
-
-<!-- `r knitr::include_graphics(system.file(package='BiocWorkshops2019', 'vignettes', 'GDS_hierarchy.jpg'))` -->
 
 by supporting specific functions like: 
 
@@ -279,15 +318,21 @@ SeqArray | seqGetData | Get data with a defined filter
 SeqArray | seqApply | Apply a user-defined function over array margins
 SeqArray | seqParallel | Apply a function in parallel
 
+```{r, GDSread}
+readex.gdsn(index.gdsn(g1, "sample.id"), 1:5)
+aperm(readex.gdsn(index.gdsn(g1, "genotype/data"), list(1, 1:5, 1:5)), c(3,2,1))
+closefn.gds(g1)
+```
+
 These functions corresponds to the GDS data structure and works best
  with the indexing strategy and compression methods. But at the same
- time, it also requires much efforts from users to be familiar with
- the whole set of strategies and functions in order to make full use
- of these packages.
+ time, These usual operations on manipulating files and contents
+ require much efforts from users in order to make full use of these
+ packages.
 
 #### `GDSArray`, `GDSMatrix`, and `GDSFile`
 
-To fully make use of the GDS format, and at the same time provide
+To fully make use of the GDS format, and at the same time, to provide
 users a familiar interface with common operations and methods within
 the _R/Bioconductor_ ecosystem, We have developed the package of
 [GDSArray][] to represent GDS files as `DelayedArray` instances. It
