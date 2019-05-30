@@ -9,12 +9,14 @@ author:
 vignette: >
   %\VignetteIndexEntry{Lazy Representations of Very Large Genomic Data Resources in R/Bioconductor}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteEncoding{UTF-8}{inputenc}
 date: "Last modified: May 30, 2019; Compiled: `r format(Sys.time(), '%B %d, %Y')`"
 output:
-    BiocStyle::html_document:
-        toc: true
-        toc_float: true
+    rmarkdown::html_document:
+    highlight: pygments
+    toc: true
+    toc_depth: 3
+    fig_width: 5
 ---
 
 ```{r, include = FALSE}
