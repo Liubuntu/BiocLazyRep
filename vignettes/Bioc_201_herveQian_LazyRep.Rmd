@@ -1,5 +1,4 @@
 ---
-title: "Lazy Representations of Very Large Genomic Data Resources in R/Bioconductor"
 author:
 - name: Hervé Pagès
   affiliation: Fred Hutchinson Cancer Research Center, Seattle, WA
@@ -11,7 +10,7 @@ vignette: >
   %\VignetteIndexEntry{Lazy Representations of Very Large Genomic Data Resources in R/Bioconductor}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-date: "Last modified: May 27, 2019; Compiled: `r format(Sys.time(), '%B %d, %Y')`"
+date: "Last modified: May 30, 2019; Compiled: `r format(Sys.time(), '%B %d, %Y')`"
 output:
     BiocStyle::html_document:
         toc: true
@@ -29,9 +28,9 @@ options(showHeadLines=3)
 options(showTailLines=3)
 ```
 
+# Lazy Representations of Very Large Genomic Data Resources in R/Bioconductor
 
-
-# Introduction
+## Introduction
 
 TODO: Provide a quick description of the workshop with pre-requisites, goals, time outline, etc...
 
@@ -52,10 +51,10 @@ library(VariantAnnotation)
 
 
 
-# DelayedArray objects
+## DelayedArray objects
 
 
-## What is a DelayedArray object?
+### What is a DelayedArray object?
 
 A DelayedArray object is a data structure that can be used to wrap any
 matrix-like or array-like dataset. This wrapping serves 2 purposes:
@@ -126,11 +125,11 @@ sum(A3)
 ```
 
 
-## Operations on DelayedArray objects
+### Operations on DelayedArray objects
 
 Operations on a DelayedArray object are either `delayed` or `block-processed`.
 
-### Delayed operations
+#### Delayed operations
 
 For example the `+ 1` and `log` operations in `A3 <- log(A2 + 1)` are delayed.
 This means that they are very fast and produce a new DelayedArray object
@@ -175,7 +174,7 @@ An important principle: The seed of a DelayedArray object is **always**
 treated as a _read-only_ object so will never be modified by the operations
 we perform on the object.
 
-### Block-processed operations
+#### Block-processed operations
 
 TODO (by Hervé)
 
@@ -183,29 +182,29 @@ TODO (by Hervé)
   operations on DelayedMatrix objects.
 
 
-## In-memory vs on-disk objects
+### In-memory vs on-disk objects
 
 TODO (by Hervé)
 
 
-## HDF5 backend
+### HDF5 backend
 
 TODO (by Hervé)
 - `path(A2)`
 - `h5ls(path(A2))`
 
 
-## Using DelayedArray objects in a SummarizedExperiment object
+### Using DelayedArray objects in a SummarizedExperiment object
 
 TODO (by Hervé)
 
 
-## Implementing a DelayedArray backend
+### Implementing a DelayedArray backend
 
 TODO (by Hervé)
 
 
-## Conclusion
+### Conclusion
 
 TODO (by Hervé)
 
@@ -215,12 +214,12 @@ TODO (by Hervé)
 
 
 
-# Specialized DelayedArray backends
+## Specialized DelayedArray backends
 
 
-## Extension of `DelayedArray` with GDS backend
+### Extension of `DelayedArray` with GDS backend
 	
-### Genomic Data Structure (GDS)
+#### Genomic Data Structure (GDS)
 
 The _Bioconductor_ package `gdsfmt` has provided a high-level R
 interface to CoreArray Genomic Data Structure (GDS) data files, which
@@ -243,7 +242,7 @@ More details about GDS format can be found in the vignettes of the
 [SNPRelate]: https://bioconductor.org/packages/SNPRelate
 [SeqArray]: https://bioconductor.org/packages/SeqArray
 
-### `GDSArray`, `GDSMatrix`, and `GDSFile`
+#### `GDSArray`, `GDSMatrix`, and `GDSFile`
 
 `GDSArray` represents GDS files as `DelayedArray` instances. It has
 methods like `dim`, `dimnames` defined, and it inherits array-like
@@ -288,7 +287,7 @@ Try typing in `gf$ann` and pressing `tab` key for the auto-completion.
 gdsfile(gf)
 ```
 
-### seed contract
+#### seed contract
 
 `GDSArray` follows the seed contract for `DelayedArray` extension, and
   supports the `dim`, `dimnames` methods.
@@ -300,7 +299,7 @@ dim(ga)
 lengths(dimnames(ga))
 ```
 
-### methods
+#### methods
 
 `GDSArray` instances can be subset, following the usual _R_
 conventions, with numeric or logical vectors; logical vectors are
@@ -337,10 +336,10 @@ infrastructure and methods.
 
 
 
-## Extension of `DelayedArray` with VCF backend
+### Extension of `DelayedArray` with VCF backend
+	
 
-
-### Introduction
+#### Introduction
 
 [VCFArray][] is a _Bioconductor_ package that represents VCF files as
 objects derived from the [DelayedArray][] package and `DelayedArray`
@@ -361,7 +360,7 @@ information field (e.g., AA, AF...), and the individual format field
  
  [VCFArray]: https://bioconductor.org/packages/VCFArray
 
-### `vcfFields()`
+#### `vcfFields()`
 
 The `vcfFields()` method takes the character string (VCF file path),
 `VcfFile` object or `RangedVcfStack` object as input, and returns a
@@ -378,7 +377,7 @@ library(VariantAnnotation)
 vcfFields(fl)
 ```
 
-### `VCFArray`, `VCFMatrix` and `vcffile()`
+#### `VCFArray`, `VCFMatrix` and `vcffile()`
 
 We can construct the `VCFArray` object from the same input as
 `vcfFields()` methods (the character string for VCF file path,
@@ -424,7 +423,7 @@ chr22url.tbi <- paste0(chr22url, ".tbi")
 va <- VCFArray(chr22url, vindex =chr22url.tbi, name = "GT")
 ```
 
-### `DelayedArray` seed contract
+#### `DelayedArray` seed contract
 
 ```{r, VCFArray seedAccessor}
 va <- VCFArray(fl, name = "GT")
@@ -434,7 +433,7 @@ dim(va)
 lapply(dimnames(va), head)
 ```
 
-### methods
+#### methods
 ```{r, VCFArray methods}
 vcffile(va)
 
@@ -447,9 +446,9 @@ log(ds+5)
 
 
 
-# `DelayedDataFrame` for delayed representation of metadata 
+## `DelayedDataFrame` for delayed representation of metadata 
 	
-## Introduction
+### Introduction
 As the genetic/genomic data are having increasingly larger profile,
 the annotation file are also getting much bigger than expected. the
 memory space in _R_ has been an obstable for fast and efficient data
@@ -482,7 +481,7 @@ _R/Bioconductor_ alternatives.
 [GDSArray]: https://bioconductor.org/packages/GDSArray
 [HDF5Array]: https://bioconductor.org/packages/HDF5Array
 
-## DelayedDataFrame class
+### DelayedDataFrame class
 
 `DelayedDataFrame` extends the `DataFrame` data structure, with an
 additional slot called `lazyIndex`, which saves all the mapping
@@ -512,7 +511,7 @@ construct a `DelayedDataFrame` object.
 ddf <- DelayedDataFrame(idx = seq_len(dim(AA)), varid, AA)
 ```
 
-### `lazyIndex` slot
+#### `lazyIndex` slot
 
 The `lazyIndex` slot is in `LazyIndex` class, which is defined in the
 `DelayedDataFrame` package and extends the `SimpleList` class. The
@@ -564,7 +563,7 @@ df1@listData
 dim(df1)
 ```
 
-### Methods
+#### Methods
 
 `DelayedDataFrame` supports for all methods that are available in
 `DataFrame`, including the `[` subsetting, `[[` extraction, `rbind`,
@@ -600,9 +599,9 @@ lazyIndex(ddfcb)
 
 
 
-# `VariantExperiment` container for lazy infrastructures
+## `VariantExperiment` container for lazy infrastructures
 
-## Introduction
+### Introduction
 [VariantExperiment][] is a _Bioconductor_ package that directly
 extends [SummarizedExperiment][] to lazies represent very large
 sequencing data with "backend" data structure of `VCF` or `GDS`.  
@@ -625,7 +624,7 @@ widely used bioinformatics tools that are available on _R/Bioconductor_.
 [SummarizedExperiment]: https://bioconductor.org/packages/SummarizedExperiment
 [SingleCellExperiment]: https://bioconductor.org/packages/SingleCellExperiment
 
-## `VariantExperiment` class
+### `VariantExperiment` class
 `VariantExperiment` class is defined to extend the
 `SummarizedExperiment` class. The difference would be that the assay
 data are saved as `GDSArray` or `VCFArray`, and the metadata are saved
@@ -649,7 +648,7 @@ rowData(ve)
 colData(ve)
 ```
 
-## Constructor
+### Constructor
 
 Arguments in `makeSummarizedExperimentfromGDS()` could be specified to
 take only certain annotation columns for features and samples. All
@@ -736,7 +735,7 @@ Since the `VCFArray` was written internally using `VariantAnnotation`,
 we are still working to enable the statistical funtions and methods on
 the `VariantExperiment` objects with `VCF` backends. 
 	
-## Basic methods
+### Basic methods
 
 Consistent with `SummarizedExperiment`, The `VariantExperiment` object
 supports `[` subsetting. The `$` subsetting could also be operated
@@ -763,7 +762,7 @@ ve1 <- subsetByOverlaps(ve, GRanges("22:1-48958933"))
 ve1
 ```
 
-## Save / load `VariantExperiment` object
+### Save / load `VariantExperiment` object
 
 Note that the operations on `VariantExperiment` are delayed.  So after
 subsetting by `[`, `$` or `Ranged-based` operations, and you feel
@@ -811,7 +810,7 @@ Now we are all set for any downstream analysis as needed.
 head(hwe(ve1))
 ```
 
-## Statistical methods
+### Statistical methods
 
 With `GDS` backend, Many statistical functions and methods are defined on
 `VariantExperiment` objects, most of which has their generic defined
@@ -868,5 +867,5 @@ countSingletons(ve)
 
 
 
-# examples? use case?
+## examples? use case?
 
