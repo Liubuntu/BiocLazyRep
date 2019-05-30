@@ -43,6 +43,8 @@ library(DelayedArray)
 library(HDF5Array)
 library(DelayedMatrixStats)
 library(SummarizedExperiment)
+library(gdsfmt)
+library(SeqArray)
 library(GDSArray)
 library(VCFArray)
 library(DelayedDataFrame)
@@ -219,43 +221,87 @@ TODO (by Hervé)
 ## Specialized DelayedArray backends
 
 
-### Extension of `DelayedArray` with GDS backend
-	
-#### Genomic Data Structure (GDS)
 
-The _Bioconductor_ package `gdsfmt` has provided a high-level R
-interface to CoreArray Genomic Data Structure (GDS) data files, which
-is designed for large-scale datasets, especially for data which are
-much larger than the available random-access memory.
+### Extension of `DelayedArray` with GDS backend
+
+#### CoreArray & Genomic Data Structure
+
+[CoreArray][] (C++ library) is designed for portable and scalable
+storage of large-scale bioinformatics data, which are usually much
+larger than the available random-access memory. The data format of
+Genomic Data Structure (GDS) is used to store multiple array-oriented
+datasets in a single file. The _Bioconductor_ package [gdsfmt][] has
+provided a high-level R interface for [CoreArray][].
 
 The GDS format has been widely used in genetic/genomic research for
-high-throughput genotyping or sequencing data. There are two major
-classes that extends the `gds.class`: `SNPGDSFileClass` suited for
-genotyping data (e.g., GWAS), and `SeqVarGDSClass` that are designed
+high-throughput genotyping or sequencing data.  There are two major S3
+classes that extends the basic `gds.class`: `SNPGDSFileClass` (defined
+in [SNPRelate][]) suited for genotyping data (e.g., GWAS), and
+`SeqVarGDSClass` (defined in [SeqArray][]) that are designed
 specifically for DNA-sequencing data. The file format attribute in
 each data class is set as `SNP_ARRAY` and `SEQ_ARRAY`. There are rich
 functions written based on these data classes for common data
-operation and statistical analysis.
+operation and statistical analysis in the R packages of [SNPRelate][]
+and [SeqArray][].
 
-More details about GDS format can be found in the vignettes of the
-[gdsfmt][], [SNPRelate][], and [SeqArray][] packages.
+More details about GDS can be found in the above mentioned package
+vignettes. Additional information about CoreArray and GDS could also
+be found [here](https://www.biostat.washington.edu/sites/default/files/modules/GDS_intro.pdf).
 
+[CoreArray]: http://corearray.sourceforge.net/
 [gdsfmt]: https://bioconductor.org/packages/gdsfmt
 [SNPRelate]: https://bioconductor.org/packages/SNPRelate
 [SeqArray]: https://bioconductor.org/packages/SeqArray
 
+The GDS file inside R is using hierarchical structure: 
+
+```{r, GDS}
+file <- seqExampleFileName("gds")
+g1 <- gdsfmt::openfn.gds(file)
+g1
+closefn.gds(g1)
+```
+
+<!-- `r knitr::include_graphics(system.file(package='BiocWorkshops2019', 'vignettes', 'GDS_hierarchy.jpg'))` -->
+
+by supporting specific functions like: 
+
+Package | Function | Description
+--------|----------|--------------
+gdsfmt | createfn.gds | Create a gds file
+gdsfmt | openfn.gds | open a gds file in R
+gdsfmt | add.gdsn | add a gds node
+gdsfmt | assign.gdsn | assign values into gds node
+gdsfmt | closefn.gds | close a gds instance
+SeqArray | seqVCF2GDS | Reformat a VCF file
+SeqArray | seqSetFilter | Define a subset of samples or variants
+SeqArray | seqGetData | Get data with a defined filter
+SeqArray | seqApply | Apply a user-defined function over array margins
+SeqArray | seqParallel | Apply a function in parallel
+
+These functions corresponds to the GDS data structure and works best
+ with the indexing strategy and compression methods. But at the same
+ time, it also requires much efforts from users to be familiar with
+ the whole set of strategies and functions in order to make full use
+ of these packages.
+
 #### `GDSArray`, `GDSMatrix`, and `GDSFile`
 
-`GDSArray` represents GDS files as `DelayedArray` instances. It has
-methods like `dim`, `dimnames` defined, and it inherits array-like
-operations and methods from `DelayedArray`, e.g., the subsetting
-method of `[`.
+To fully make use of the GDS format, and at the same time provide
+users a familiar interface with common operations and methods within
+the _R/Bioconductor_ ecosystem, We have developed the package of
+[GDSArray][] to represent GDS files as `DelayedArray` instances. It
+obeys the seed contract of [DelayedArray][] by supporting `dim`,
+`dimnames` methods, and inherits array-like operations and methods
+from `DelayedArray`, e.g., the subsetting method of `[`.
 
-The `GDSArray()` constructor takes as arguments the file path and the
-GDS node inside the GDS file. The `GDSArray()` constructor always
-returns the object with rows being features (genes / variants / snps)
-and the columns being "samples". This is consistent with the assay
-data inside `SummarizedExperiment`.
+The `GDSArray()` constructor takes arguments for the GDS file path and
+the GDS node name, with one `GDSArray` object only representing one
+GDS node. The `GDSArray()` built from GDS file always returns with
+rows being features (genes / variants / snps) and the columns being
+"samples", which is consistent with the assay data inside
+`SummarizedExperiment` and easy to fit into a `SummarizedExperiment`
+object.
 
 ```{r, GDSArray}
 file <- SeqArray::seqExampleFileName("gds")
@@ -281,7 +327,9 @@ gf <- GDSFile(file)
 gf$annotation$info
 gf$annotation$info$AC
 ```
-Try typing in `gf$ann` and pressing `tab` key for the auto-completion. 
+FIXME (auto completion): Try typing in `gf$ann` and pressing `tab` key
+for the auto-completion.
+
 
 `gdsfile` function returns the file path of the corresponding GDS
   file.
@@ -315,7 +363,6 @@ ga[c(TRUE, FALSE), , ]
 some numeric calculation: 
 ```{r, GDSArray numeric}
 dp <- GDSArray(file, "annotation/format/DP/data")
-dp
 log(dp)
 dp[rowMeans(dp) < 60, ]
 ```
@@ -323,11 +370,11 @@ dp[rowMeans(dp) < 60, ]
 
 **Summary:**
 
-`GDSArray` is a Bioconductor package that represents GDS files as
-objects derived from `DelayedArray` class. It converts a GDS node in
-the file to a `DelayedArray`-derived data structure. The rich common
-methods and data operations defined on `GDSArray` makes it more
-R-user-friendly than working with the GDS file directly. 
+`GDSArray` represents GDS file as objects derived from `DelayedArray`
+class. It converts a GDS node in the file to a `DelayedArray` derived
+data structure. The rich common methods and data operations defined on
+`GDSArray` makes it more R-user-friendly than working with the GDS
+file directly.
 
 The array data from GDS files are always returned with the first
 dimension being "variants/snps" and the second dimension being
