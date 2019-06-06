@@ -50,8 +50,8 @@ examples. Instructions and notes will be included.
 
 ## Pre-requisites
 
-- Basic knowledge of R syntax
-- Knowledge of the `DelayedArray` class
+- Basic knowledge of R syntax (`matrix`, `array`, `data.frame`, etc.)
+- Knowledge of the `DelayedArray` class (Hervé?)
 - Familiarity with `SummarizedExperiment` class
 
 ## Workshop Participation
