@@ -65,11 +65,10 @@ code chunks.
 Activity | Time 
 ---------|------
 DelayedArray and about   | 50m  (**to be modified by Hervé**)
-Specialized DelayedArray backends | 10m
+Specialized DelayedArray backends | 15m
 DelayedDataFrame | 10m 
-VariantExperiment & examples | 20m
-SQLDataFrame & examples (BigQuery??)| 10m
-|
+SQLDataFrame (&examples?) | 10m
+VariantExperiment & examples | 15m
 
 ## Learning objectives
 - Create DelayedArray with different backends (**to be modified by Hervé**)
@@ -692,6 +691,20 @@ lazyIndex(ddfcb)
 ```
 
 
+
+
+## SQLDataFrame
+### Introduction
+### SQLDataFrame class
+- Constructor
+- slot & accessors
+- makeSQLDataframe
+- saveSQLDataFrame
+### SQLDataFrame methods
+-[, [[
+- filter, mutate
+- union, rbind
+- *_join
 
 ## `VariantExperiment` container for lazy infrastructures
 
