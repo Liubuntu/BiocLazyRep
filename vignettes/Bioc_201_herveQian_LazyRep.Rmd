@@ -65,17 +65,18 @@ code chunks.
 Activity | Time 
 ---------|------
 DelayedArray and about   | 50m  (**to be modified by Hervé**)
-Specialized DelayedArray backends | 15m
+Specialized DelayedArray backends | 14m
 DelayedDataFrame | 10m 
 SQLDataFrame (&examples?) | 10m
-VariantExperiment & examples | 15m
+VariantExperiment & examples | 16m
 
 ## Learning objectives
 - Create `DelayedArray` with different backends (**to be modified by Hervé**)
+- Use 
 - Create `SQLDataFrame` from in-memory data, text format file, and database tables. 
 - Use `SQLDataFrame` to represent and manipulate godb database tables.
 - Statistical analysis of variant data (VCF) using `VariantExperiment`.
-  
+		
 ##  _R/Bioconductor_ packages 
 
 to-be-used in this workshop:
@@ -266,7 +267,7 @@ TODO (by Hervé)
 
 ### Extension of `DelayedArray` with GDS backend
 
-#### CoreArray & Genomic Data Structure
+#### CoreArray and Genomic Data Structure
 
 [CoreArray][] (C++ library) is designed for portable and scalable
 storage of large-scale bioinformatics data, which are usually much
@@ -295,7 +296,7 @@ be found [here](https://www.biostat.washington.edu/sites/default/files/modules/G
 [SNPRelate]: https://bioconductor.org/packages/SNPRelate
 [SeqArray]: https://bioconductor.org/packages/SeqArray
 
-The GDS file inside R is using hierarchical structure: 
+The GDS file inside R uses hierarchical structure: 
 
 ```{r, GDSopen}
 file <- seqExampleFileName("gds")
@@ -303,7 +304,7 @@ g1 <- gdsfmt::openfn.gds(file)
 g1
 ```
 
-by supporting specific functions like: 
+Specific functions in manipulating the GDS file: 
 
 Package | Function | Description
 --------|----------|--------------
@@ -318,9 +319,17 @@ SeqArray | seqGetData | Get data with a defined filter
 SeqArray | seqApply | Apply a user-defined function over array margins
 SeqArray | seqParallel | Apply a function in parallel
 
+For example, `index.gdsn` will be used to refer to a gds node, and
+`readex.gdsn` is the function to call for subset reading, by providing
+the index node, and the indexes as a list.
+
 ```{r, GDSread}
-readex.gdsn(index.gdsn(g1, "sample.id"), 1:5)
-aperm(readex.gdsn(index.gdsn(g1, "genotype/data"), list(1, 1:5, 1:5)), c(3,2,1))
+sample.node <- index.gdsn(g1, "sample.id")
+readex.gdsn(sample.node, 1:5)
+geno.node <- index.gdsn(g1, "genotype/data")
+aperm(
+    readex.gdsn(geno.node, list(1, 1:5, 1:5)),
+    c(3,2,1))
 closefn.gds(g1)
 ```
 
@@ -343,7 +352,7 @@ from `DelayedArray`, e.g., the subsetting method of `[`.
 The `GDSArray()` constructor takes arguments for the GDS file path and
 the GDS node name, with one `GDSArray` object only representing one
 GDS node. The `GDSArray()` built from GDS file always returns with
-rows being features (genes / variants / snps) and the columns being
+rows being "features" (genes / variants / snps) and the columns being
 "samples", which is consistent with the assay data inside
 `SummarizedExperiment` and easy to fit into a `SummarizedExperiment`
 object.
@@ -352,9 +361,8 @@ object.
 file <- SeqArray::seqExampleFileName("gds")
 GDSArray(file, "genotype/data")
 ```
-A `GDSMatrix` is a 2-dimensional `GDSArray`, and will be returned from
-the `GDSArray()` constructor automatically if the input GDS node is
-2-dimensional.
+Note that a `GDSMatrix` will be returned by default for 2-dimensional
+`GDSArray`. 
 
 ```{r, GDSMatrix}
 GDSArray(file, "phase/data")
@@ -372,9 +380,9 @@ gf <- GDSFile(file)
 gf$annotation$info
 gf$annotation$info$AC
 ```
-FIXME (auto completion): Try typing in `gf$ann` and pressing `tab` key
-for the auto-completion.
-
+Try typing in `gf$ann` and pressing `tab` key for the
+auto-completion. (Changes made in `GDSArray`, wait for new build
+tomorrow June 7th.)
 
 `gdsfile` function returns the file path of the corresponding GDS
   file.
