@@ -71,10 +71,11 @@ SQLDataFrame (&examples?) | 10m
 VariantExperiment & examples | 15m
 
 ## Learning objectives
-- Create DelayedArray with different backends (**to be modified by Hervé**)
-- Analyze variant data using `VariantExperiment`
-- Create SQLDataFrame from SQL database table on local disk or web resources (e.g., BigQuery)
-
+- Create `DelayedArray` with different backends (**to be modified by Hervé**)
+- Create `SQLDataFrame` from in-memory data, text format file, and database tables. 
+- Use `SQLDataFrame` to represent and manipulate godb database tables.
+- Statistical analysis of variant data (VCF) using `VariantExperiment`.
+  
 ##  _R/Bioconductor_ packages 
 
 to-be-used in this workshop:
