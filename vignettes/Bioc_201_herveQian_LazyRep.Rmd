@@ -729,16 +729,294 @@ lazyIndex(ddfcb)
 
 ## SQLDataFrame
 ### Introduction
+
+A database is an organized collection of data. Relational databases is
+a digital database based on the relational model of data. Virtually
+all relational databases management systems use Structured Query
+Language (SQL) for querying and maintaining the database.
+
+The **rstudio** team has developed `dbplyr`, to work with remote
+on-disk data stored in databases. It complies with the `dplyr` grammar
+and supports the lazy representation and manipulation of database
+tables.
+
+We are introducing an _R/Bioconductor_ package `SQLDataFrame`, which
+was developed on top of the `dbplyr` package. It has a `DataFrame`
+interface, which is familiar to most _R_ users, and supports the
+interoperability with the rich collection of _Bioconductor_ packages
+and workflows for high-throughput genomic data analysis.
+
+NOTE that currently we are only supporting the DBI backend of
+`RSQLite`. But theoretically, we would implement `SQLDataFrame` so
+that users could choose to use different database backends, including
+MySQL, PostgreSQL, MariaDB, and Google's BigQuery, etc. 
+
 ### SQLDataFrame class
+
 - Constructor
-- slot & accessors
+
+To construct a `SQLDataFrame` object, 3 arguments are needed:
+`dbname`, `dbtable` and `dbkey`. The `dbname` is the file path to the
+database that is on-disk or remote. `dbtable` argument specifies the
+database table name that is going to be represented as `SQLDataFrame`
+object. If only one table is available in the specified database name,
+this argument could be left blank. The `dbkey` argument is used to
+specify the column name in the table which could uniquely identify all
+the data observations (rows). 
+
+Note that after reading the database table into `SQLDataFrame`, the
+key columns will be kept as fixed columns showing on the left hand
+side, with `|` separating key column(s) with the other columns. The
+`ncol`, `colnames`, and corresponding column subsetting will only
+apply to the non-key-columns.
+
+
+```{r constructor}
+dbfile <- system.file("extdata/test.db", package = "SQLDataFrame")
+obj <- SQLDataFrame(
+    dbname = dbfile, dbtable = "colData", dbkey = "sampleID")
+obj
+dim(obj)
+colnames(obj)
+```
+
 - makeSQLDataframe
+
+We could also construct a `SQLDataFrame` object directly from a file
+name. The `makeSQLDataFrame` function takes input of a in-memory data
+frame or character value of file name for common text files (.csv,
+.txt, etc.), write into database tables, and open as `SQLDataFrame`
+object. Users could provide values for the `dbname` and `dbtable`
+argument. If NULL, default value for `dbname` would be a temporary
+database file, and `dbtable` would be the `basename(filename)` without
+extension.
+
+**NOTE** that the input file must have one or multiple columns that
+could uniquely identify each observation (row) to be used the
+`dbkey()` for `SQLDataFrame`. Also the file must be rectangular, i.e.,
+rownames are not accepted. But users could save rownames as a separate
+column. 
+
+```{r}
+mtc <- tibble::rownames_to_column(mtcars)[,1:6]
+aa <- makeSQLDataFrame(mtc, dbkey = "rowname", overwrite = TRUE)
+aa
+dbname(aa)
+dbtable(aa)
+
+filename <- file.path(tempdir(), "mtc.csv")
+write.csv(mtc, file= filename, row.names = FALSE)
+aa1 <- makeSQLDataFrame(filename, dbkey = "rowname", sep = ",",
+                       overwrite = TRUE)
+aa1
+dbname(aa1)
+dbtable(aa1)
+```
+
 - saveSQLDataFrame
+
+With all the methods (`[` subsetting, `rbind`, `*_join`, etc.,)
+provided in the next section, the `SQLDataFrame` always work like a
+lazy representation until users explicitly call the `saveSQLDataFrame`
+function for realization. 
+
+It's also recommended that users call `saveSQLDataFrame` frequently to
+avoid the slow down in data processing because of too many lazy layers. 
+
+```{r}
+dbfile <- system.file("extdata/test.db", package = "SQLDataFrame")
+obj <- SQLDataFrame(dbname = dbfile, dbtable = "state", dbkey = "state")
+dbname(obj)
+dbtable(obj)
+obj1 <- saveSQLDataFrame(obj, dbname = tempfile(fileext = ".db"),
+                         dbtable = "obj_copy")
+dbname(obj1)
+dbtable(obj1)
+```
+
+
 ### SQLDataFrame methods
--[, [[
-- filter, mutate
-- union, rbind
-- *_join
+
+#### [, [[
+
+`[[,SQLDataFrame` Behaves similarly to `[[,DataFrame` and returns a
+realized vector of values from a single column. `$,SQLDataFrame` is
+also defined to conveniently extract column values.
+
+```{r}
+head(obj[[1]])
+head(obj[["region"]])
+head(obj$size)
+```
+`SQLDataFrame` objects can be subsetted in a similar way of
+`DataFrame` following the usual _R_ conventions, with numeric,
+character or logical vectors; logical vectors are recycled to the
+appropriate length. 
+
+**NOTE**, use `drop=FALSE` explicitly for single column subsetting if
+you want to return a `SQLDataFrame` object, otherwise, the default
+`drop=TRUE` would always return a realized value for that column.
+
+```{r, subsetting}
+obj[1:3, 1:2]
+obj[c(TRUE, FALSE), c(TRUE, FALSE), drop=FALSE]
+obj[1:3, "population", drop=FALSE]
+obj[, "population"]  ## realized column value
+obj[c("Alabama", "Colorado"), ]
+```
+
+List style subsetting is also allowed to extract certain columns from
+the `SQLDataFrame` object which returns `SQLDataFrame` by default. 
+
+```{r}
+obj[1]
+obj["region"]
+```
+
+#### filter, mutate
+
+We have also enabled the S3 methods of `filter` and `mutate` from
+`dplyr` package, so that users could have the convenience in filtering
+data observations and adding new columns.
+
+```{r}
+obj1 %>% filter(division == "South Atlantic" & size == "medium")
+```
+
+```{r}
+obj1 %>% mutate(p1 = population/10, s1 = size)
+```
+
+#### union, rbind
+
+To be consistent with `DataFrame`, `union` and `rbind` methods were
+implemented for `SQLDataFrame`, where `union` returns the
+`SQLDataFrame` sorted by the `dbkey(obj)`, and `rbind` keeps the
+original orders of input objects.
+
+```{r}
+dbfile1 <- system.file("extdata/test.db", package = "SQLDataFrame")
+dbfile2 <- system.file("extdata/test1.db", package = "SQLDataFrame")
+ss1 <- SQLDataFrame(dbname = dbfile1, dbtable = "state",
+                    dbkey = c("state"))
+ss2 <- SQLDataFrame(dbname = dbfile2, dbtable = "state1",
+                    dbkey = c("state"))
+ss11 <- ss1[sample(5), ]
+ss21 <- ss2[sample(10, 5), ]
+```
+
+- union
+```{r, eval=FALSE}
+obj1 <- union(ss11, ss21)
+obj1  ## reordered by the "dbkey()"
+```
+
+- rbind
+```{r}
+obj2 <- rbind(ss11, ss21)
+obj2  ## keeping the original order by updating the row index
+```
+
+#### *_join
+
+The `*_join` family methods was implemented for `SQLDataFrame`
+objects, including the `left_join`, `inner_join`, `semi_join` and
+`anti_join`, which provides the capability of merging database files
+from different sources.
+
+```{r}
+ss12 <- ss1[1:10, 1:2]
+ss22 <- ss2[6:15, 3:4]
+left_join(ss12, ss22)
+inner_join(ss12, ss22)
+semi_join(ss12, ss22)
+anti_join(ss12, ss22)
+```
+
+#### DEVELOPERS ONLY
+
+To make the `SQLDataFrame` object as light and compact as possible,
+there are only 5 slots contained in the object: `tblData`, `dbkey`,
+`dbnrows`, `dbconcatKey`, `indexes`. Metadata information could be
+returned through these 5 slots using slot accessors or other utility
+functions. 
+```{r}
+slotNames(obj)
+dbname(obj)
+dbtable(obj)
+dbkey(obj)
+```
+
+- `tblData` slot
+
+The `tblData` slot saves the `dbplyr::tbl_dbi` version of the database
+table, which is a light-weight representation of the database table in
+_R_. Of note is that this lazy tbl only contains unique rows. It could
+also be sorted by the `dbkey(obj)` if the `SQLDataFrame` object was
+generated from `union` or `rbind`. So when the `saveSQLDataFrame()`
+function was called, a database table will be written into a physical
+disk space and have the unique records.
+
+Accessor function is made avaible for this slot: 
+```{r}
+tblData(obj)
+```
+
+`saveSQLDataFrame` write the lazy tbl carried in `tblData` slot into
+an on-disk database table, and re-open the `SQLDataFrame` object from
+the new path.
+
+
+- `dbnrows` and `dbconcatKey`
+The `dbnrows` slot saves the number of rows corresponding to the
+`tblData`, and `dbconcatKey` saves the realized (concatenated if
+multiple) key columns corresponding to the `tblData`. Accessor
+functions are also available for these 2 slots: 
+
+```{r}
+dbnrows(obj)
+dbconcatKey(obj)
+```
+
+- `indexes` slot
+The `indexes` slots is an unnamed list saving the row and column
+indexes respectively corresponding to the `tblData` slot, so that the
+`SQLDataFrame` could possibly have duplicate rows or only a subset of
+data records from the `tblData`, while the `tblData` slot doesn't need
+to be changed. To be consistent, the slots of `dbnrows` and
+`dbconcatKey` will also remain unchanged.
+
+```{r}
+obj@indexes
+obj_sub <- obj[sample(5, 3, replace = TRUE), 2:3]
+obj_sub
+obj_sub@indexes
+identical(tblData(obj), tblData(obj_sub))
+```
+
+With a `filter` function (which is similar to `[i, ]` subsetting),
+only the `indexes` slot will be updated for the row index pointing to
+the `tblData`.
+
+```{r}
+obj_filter <- obj %>% filter(division == "South Atlantic" & size == "medium")
+obj_filter@indexes
+identical(tblData(obj), tblData(obj_filter))
+```
+
+- methods
+
+The `ROWNAMES,SQLDataFrame` method was defined to return the
+(concatenated by `\b` if multiple) key column(s) value, so that the row
+subsetting with character vector works for the `SQLDataFrame` objects.
+
+```{r}
+obj1 <- SQLDataFrame(dbname = dbfile, dbtable = "state",
+                     dbkey = c("region", "population"))
+
+ROWNAMES(obj1[1:10,])
+obj1[c("South\b3615.0", "West\b365.0"), ]
+```
 
 ## `VariantExperiment` container for lazy infrastructures
 
