@@ -567,48 +567,41 @@ log(ds+5)
 ## `DelayedDataFrame` for delayed representation of metadata 
 	
 ### Introduction
-As the genetic/genomic data are having increasingly larger profile,
-the annotation file are also getting much bigger than expected. the
-memory space in _R_ has been an obstable for fast and efficient data
-processing, because most available _R_ or _Bioconductor_ packages are
-developed based on in-memory data manipulation. 
 
-With the development of [DelayedArray][] in representing on-disk data
-structures with different back-end in _R_-user-friendly array data
-structure (e.g., [HDF5Array][],[GDSArray][]), the high-throughput
+The development of [DelayedArray][] has made it possible for on-disk
+representation of very large datasets (in different format) as
+_R_-user-friendly array data structure (e.g.,
+[HDF5Array][],[GDSArray][]), so that the high-throughput
 genetic/genomic data are now being able to easily loaded and
-manipulated within _R_. However, the annotation files for the samples
-and features inside the high-through data are also getting
-unexpectedly larger than before. With an ordinary `data.frame` or
-`DataFrame`, it is still getting more and more challenging for any
-analysis to be done within _R_. 
+manipulated within _R_. However, the metadata for the samples and
+features are also getting unexpectedly larger than before. With an
+ordinary `data.frame` or `DataFrame`, the memory space in _R_ faces
+challenges in fast and efficient data processing, because most
+available _R_ or _Bioconductor_ packages are developed based on
+in-memory data manipulation.
 
 So we have developed the `DelayedDataFrame`, which uses the familiar
 _R/Bioconductor_ paradigm, and at the same time, all data (in the unit
 of columns) could be optionally saved on-disk (e.g., in
 [DelayedArray][] structure with any back-end). Common operations like
 constructing, subsetting, splitting, combining could be done using the
-familiar`DataFrame` metaphor. This feature of `DelayedDataFrame` could
-enable efficient on-disk reading and processing of the large-scale
-annotation files, and use signicantly less memory than in-memory
-_R/Bioconductor_ alternatives.
+familiar`DataFrame` metaphor. 
+
+This feature of `DelayedDataFrame` could enable efficient on-disk
+reading and processing of the large-scale annotation files, and use
+signicantly less memory than in-memory _R/Bioconductor_ alternatives.
 
 [HDF5]: https://www.hdfgroup.org/solutions/hdf5/
 [GDS]: http://corearray.sourceforge.net/
 [DelayedArray]: https://bioconductor.org/packages/DelayedArray
 [GDSArray]: https://bioconductor.org/packages/GDSArray
 [HDF5Array]: https://bioconductor.org/packages/HDF5Array
+	
+### `DelayedDataFrame` class
 
-### DelayedDataFrame class
-
-`DelayedDataFrame` extends the `DataFrame` data structure, with an
-additional slot called `lazyIndex`, which saves all the mapping
-indexes for each column of the data inside `DelayedDataFrame`. It is
-similar to `DataFrame` in terms of construction, subsetting,
-splitting, combining, and etc.. The `rownames` setting is consistent
-with `DataFrame`. It will not be given automatically, but only by
-explicitly specify in the constructor function `DelayedDataFrame(,
-row.names=...)` or using the slot setter function `rownames()<-`.
+`DelayedDataFrame` extends the `DataFrame` data structure, and has
+similar behavior in terms of construction, subsetting, splitting,
+combining, rownames setting, and etc.. 
 
 The `DelayedDataFrame` columns supports the [DelayedArray][] (and
 direct extensions). Here we use 1-dimensional `GDSArray` objects as
@@ -629,16 +622,48 @@ construct a `DelayedDataFrame` object.
 ddf <- DelayedDataFrame(idx = seq_len(dim(AA)), varid, AA)
 ```
 
-#### `lazyIndex` slot
+### Methods
 
-The `lazyIndex` slot is in `LazyIndex` class, which is defined in the
-`DelayedDataFrame` package and extends the `SimpleList` class. The
-`listData` slot saves unique indexes for all the columns, and the
-`index` slots saves the position of index in `listData` slot for each
-column in `DelayedDataFrame` object.  In the above example, with an
-initial construction of `DelayedDataFrame` object, the index for each
-column will all be NULL, and all 3 columns points the NULL values
-which sits in the first position in `listData` slot of `lazyIndex`.
+`DelayedDataFrame` supports for all methods that are available in
+`DataFrame`, including the `[` subsetting, `[[` extraction, `rbind`,
+and `cbind` methods, etcs.
+
+- subsetting
+
+```{r ddfMethods}
+ddf[, 1, drop=FALSE]  ## integer subscripts
+ddf[, "AA", drop=FALSE]  ## character subscripts
+ddf[, c(TRUE,FALSE)]  ## logical subscripts
+
+ddf[["AA"]]
+ddf[[3]]
+```
+
+- rbind
+
+```{r ddfRbind}
+ddf2 <- ddf[21:40, ]
+(ddfrb <- rbind(ddf1, ddf2))
+```
+
+- cbind
+
+```{r, ddfCbind, error=FALSE}
+(ddfcb <- cbind(varid = ddf1[,2, drop=FALSE], AA=ddf1[, 3, drop=FALSE]))
+```
+
+### DEVELOPERS ONLY: `lazyIndex` slot
+
+`DelayedDataFrame` uses a slot called `lazyIndex` (in `LazyIndex`
+class), to save all the mapping indexes for each column. The
+`LazyIndex` class is defined in the `DelayedDataFrame` package and
+extends the `SimpleList` class. The `listData` slot saves unique
+indexes for all the columns, and the `index` slots saves the position
+of index in `listData` slot for each column in `DelayedDataFrame`
+object. In the above example, with an initial construction of
+`DelayedDataFrame` object, the index for each column will all be NULL,
+and all 3 columns points the NULL values which sits in the first
+position in `listData` slot of `lazyIndex`.
 
 ```{r}
 lazyIndex(ddf)
@@ -681,37 +706,21 @@ df1@listData
 dim(df1)
 ```
 
-#### Methods
-
-`DelayedDataFrame` supports for all methods that are available in
-`DataFrame`, including the `[` subsetting, `[[` extraction, `rbind`,
-and `cbind` methods, etcs.
-
-```{r ddfMethods}
-ddf[, 1, drop=FALSE]  ## integer subscripts
-ddf[, "AA", drop=FALSE]  ## character subscripts
-ddf[, c(TRUE,FALSE)]  ## logical subscripts
-
-ddf[["AA"]]
-ddf[[3]]
-```
-
-When doing `rbind`ing, the `lazyIndex` of input arguments will be
-realized and a new `DelayedDataFrame` with NULL lazyIndex will be
-returned.
+NOTE that, with `rbind`-ing, the `lazyIndex` of input arguments will
+also be realized and a new `DelayedDataFrame` with NULL lazyIndex will
+be returned.
 
 ```{r ddfRbind}
-ddf2 <- ddf[21:40, ]
-(ddfrb <- rbind(ddf1, ddf2))
-lazyIndex(ddfrb)
+lazyIndex(ddf1)
+lazyIndex(ddf2)
+lazyIndex(rbind(ddf1, ddf2))
 ```
 
-`cbind`ing of`DelayedDataFrame` objects will keep all existing
+While `cbind`-ing of`DelayedDataFrame` objects will keep all existing
 `lazyIndex` of input arguments and carry into the new
 `DelayedDataFrame` object.
 
 ```{r, ddfCbind, error=FALSE}
-(ddfcb <- cbind(varid = ddf1[,2, drop=FALSE], AA=ddf1[, 3, drop=FALSE]))
 lazyIndex(ddfcb)
 ```
 
