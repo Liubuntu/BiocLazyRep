@@ -420,7 +420,6 @@ log(dp)
 dp[rowMeans(dp) < 60, ]
 ```
 
-
 **Summary:**
 
 `GDSArray` represents GDS file as objects derived from `DelayedArray`
@@ -443,24 +442,31 @@ infrastructure and methods.
 
 #### Introduction
 
-[VCFArray][] is a _Bioconductor_ package that represents VCF files as
-objects derived from the [DelayedArray][] package and `DelayedArray`
-class. It converts data entries from VCF file into a `DelayedArray`
-derived data structure. The backend VCF file could either be saved
-on-disk locally or remote as online resources. Data entries that could
-be extracted include the fixed data fields (REF, ALT, QUAL, FILTER),
-information field (e.g., AA, AF...), and the individual format field
- (e.g., GT, DP, etc.).  
- The array data generated from fixed/information fields are
- one-dimensional`VCFArray`, with the dimension being the length of the
- variants. The array data generated from individual `FORMAT` field are
- always returned with the first dimension being `variants` and the
- second dimension being `samples`. This feature is consistent with the
- assay data saved in `SummarizedExperiment`, and makes the `VCFArray`
- package easily interoperable with other established _Bioconductor_
- data infrastructure.
+The Variant Call Format (VCF) was designed to store gene sequence
+variations for the large-scale genotyping and DNA sequencing projects,
+(e.g., the 1000 Genomes Project). With the increasing sample size and
+sequencing depth, the VCF file also gets much larger than ever and
+hardly fit the memory limit of _R_.
+
+[VCFArray][] is a _Bioconductor_ package that represents VCF data
+entries as objects derived from the [DelayedArray][] data
+structure. The backend VCF file could either be saved on-disk locally
+or remote as online resources. Supported data entries include the
+fixed data fields (REF, ALT, QUAL, FILTER), information field (e.g.,
+AA, AF...), and the individual format field (e.g., GT, DP, etc.). Full
+list of supported data entries could be retrieved by `vcfFields`
+method (see details below).
+
+The array data generated from fixed/information fields are
+one-dimensional`VCFArray`, with the dimension being the length of the
+variants. The array data generated from individual `FORMAT` field are
+always returned with the first dimension being `variants` and the
+second dimension being `samples`. This feature is consistent with the
+assay data saved in `SummarizedExperiment`, and makes the `VCFArray`
+package easily interoperable with other established _Bioconductor_
+data infrastructure.
  
- [VCFArray]: https://bioconductor.org/packages/VCFArray
+[VCFArray]: https://bioconductor.org/packages/VCFArray
 
 #### `vcfFields()`
 
@@ -516,7 +522,7 @@ the backend VCF file could also be remote files. Here we included an
 example of representing VCF file of chromosome 22 from the 1000
 Genomes Project (Phase 3). **NOTE that for a remote VCF file, the
 `vindex` argument must be specified.** Since this VCF files is
-relatively big, and it takes longer time, we only show the code here
+relatively big, and thus takes longer time, we only show the code here
 without evaluation.
 
 ```{r remote, eval=FALSE}
@@ -527,6 +533,9 @@ va <- VCFArray(chr22url, vindex =chr22url.tbi, name = "GT")
 
 #### `DelayedArray` seed contract
 
+The `VCFArray` complies the seed contract of the `DelayedArray` by
+supporting the `dim`, `dimnames` methods. 
+
 ```{r, VCFArray seedAccessor}
 va <- VCFArray(fl, name = "GT")
 seed(va)
@@ -536,11 +545,18 @@ lapply(dimnames(va), head)
 ```
 
 #### methods
+
+We can use `vcffile()` to return the backend vcf file that is related
+to each `VCFArray` object. And the `VCFArray` supports the `[`
+subsetting with numeric, logical, and character subscripts. Basic
+calculations are also supported by the `DelayedArray`.
+
 ```{r, VCFArray methods}
 vcffile(va)
 
 va[1:3, 1:3]
 va[c(TRUE, FALSE), ]
+va[c("rs7410291", "rs147922003"), ]
 
 ds <- VCFArray(fl, name = "DS")
 log(ds+5)
