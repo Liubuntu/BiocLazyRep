@@ -933,7 +933,7 @@ semi_join(ss12, ss22)
 anti_join(ss12, ss22)
 ```
 
-#### DEVELOPERS ONLY
+### DEVELOPERS ONLY
 
 To make the `SQLDataFrame` object as light and compact as possible,
 there are only 5 slots contained in the object: `tblData`, `dbkey`,
@@ -1022,40 +1022,40 @@ obj1[c("South\b3615.0", "West\b365.0"), ]
 
 ### Introduction
 [VariantExperiment][] is a _Bioconductor_ package that directly
-extends [SummarizedExperiment][] to lazies represent very large
-sequencing data with "backend" data structure of `VCF` or `GDS`.  
+extends [SummarizedExperiment][] to lazily represent very large
+sequencing data (with metadata) with backends of VCF or GDS formats.
 
-The high-throughput genetic/genomic `assay` data are saved as
-[GDSArray][] / [VCFArray][] objects. In addition, the metadata for
+The high-throughput genetic/genomic assay data are saved as
+[GDSArray][] or [VCFArray][] objects. In addition, the metadata for
 features and samples (`rowData` and `colData`) are saved as
 [DelayedDataFrame][] objects. So [VariantExperiment][] has enabled the
 on-disk representation of both assay data and metadata. It uses
-significantly less memory than in-memory R alternatives and is a
+significantly less memory than in-memory R alternatives. So it is a
 lightweight container for very large genomic data resources
 represented as a complete experiment.
 
 The implementation of [SummarizedExperiment][] interface enables easy
 and common manipulations for high-throughput genetic/genomic data with
-familiar _R/Bioconductor_ paradigms, and interoperates smoothly with
-widely used bioinformatics tools that are available on _R/Bioconductor_.  
+familiar _R/Bioconductor_ paradigms, and supports smooth
+interoperability with widely used bioinformatics tools that are
+available on _R/Bioconductor_.
 
 [VariantExperiment]: https://bioconductor.org/packages/VariantExperiment 
 [SummarizedExperiment]: https://bioconductor.org/packages/SummarizedExperiment
 [SingleCellExperiment]: https://bioconductor.org/packages/SingleCellExperiment
 
 ### `VariantExperiment` class
-`VariantExperiment` class is defined to extend the
-`SummarizedExperiment` class. The difference would be that the assay
-data are saved as `GDSArray` or `VCFArray`, and the metadata are saved
-by default as `DelayedDataFrame` (with option to save as ordinary
-`DataFrame`). There are coercion methods defined for both `VCF` and
-`GDS` files into `VariantExperiment` objects. 
+VariantExperiment class is defined to extend the SummarizedExperiment
+class. The difference would be that the assay data are saved as
+GDSArray or VCFArray, and the metadata are saved by default as
+DelayedDataFrame (with option to save as ordinary DataFrame). There
+are coercion methods defined for both VCF and GDS files into
+VariantExperiment objects.
 
-The coercion function of `makeSummarizedExperimentFromGDS` coerces
-`GDS` files into `VariantExperiment` objects directly, with the assay
-data saved as `GDSArray`, and the `rowData()/colData()` in
-`DelayedDataFrame` by default (with the option of ordinary `DataFrame`
-object).
+The coercion function of `makeSummarizedExperimentFromGDS` coerces GDS
+files into VariantExperiment objects directly, with the assay data
+saved as GDSArray, and the rowData / colData in DelayedDataFrame
+by default (with the option of ordinary DataFrame object).
 
 ```{r, VE gds constructor, eval=FALSE}
 gds <- SeqArray::seqExampleFileName("gds")
@@ -1063,6 +1063,7 @@ ve <- makeSummarizedExperimentFromGDS(gds)
 ve
 ```
 ```{r, VE gds accessors, eval=FALSE}
+assays(ve)[[1]]
 rowData(ve)
 colData(ve)
 ```
@@ -1283,8 +1284,5 @@ titv(ve, by.sample=FALSE)
 ## countSingletons
 countSingletons(ve)
 ```
-
-
-
 ## examples? use case?
 
