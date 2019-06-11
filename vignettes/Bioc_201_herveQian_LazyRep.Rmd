@@ -1079,10 +1079,10 @@ available data entries for arguments values could be retrieved by the
 showAvailable(gds)
 ```
 
-Note that the `infoColumns` from gds file will be saved as columns
-inside the `rowData()`, with the prefix of
-"info_". `rowDataOnDisk/colDataOnDisk` could be set as `FALSE` to
-save all annotation data in ordinary `DataFrame` format.
+Note that the 'infoColumns' from gds file will be saved as columns
+inside the rowData, with the prefix of 'info_'. 'rowDataOnDisk' and
+'colDataOnDisk' could be set as 'FALSE' to save all metadata in
+ordinary DataFrame format.
 
 ```{r, makeSummarizedExperimentFromGDSArgs, eval=FALSE}
 ve3 <- makeSummarizedExperimentFromGDS(gds,
@@ -1094,36 +1094,37 @@ rowData(ve3)  ## DelayedDataFrame object
 colData(ve3)  ## DataFrame object
 ```
 
-If the `VariantExperiment` is based on `GDS`, then the function
-`gdsfile()` will return the file path to the backend `GDS` file.
+If the VariantExperiment object is based on GDS backend, then the function
+`gdsfile()` will return the file path to the GDS file.
 
 ```{r, VE gdsfile, eval=FALSE}
 gdsfile(ve)
 ```
 
 The `makeSummarizedExperimentFromVCF()` function (by default) converts
-the `VCF` file into a `GDS` file (internally using
-`SeqArray::seqVCF2GDS`), and then construct a `VariantExperiment` with
-the `GDS` file as backend.
+the VCF file into a GDS file (internally using
+`SeqArray::seqVCF2GDS`), and then construct a VariantExperiment object
+with the GDS file as backend.
 
 ```{r, VE vcf constructor, eval=FALSE}
 vcf <- SeqArray::seqExampleFileName("vcf")
 ve <- makeSummarizedExperimentFromVCF(vcf)
 ve
+gdsfile(ve)
 ```
 
-assay data is in `GDSArray` format, and the feature-related metadata
-are in `DelayedDataFrame` (with column data in `GDSArray` format).
+Assay data is in GDSArray format, and the feature-related metadata
+are in DelayedDataFrame class (with column data in GDSArray format).
 
 ```{r, VE vcf accessors, eval=FALSE}
 assay(ve, 1)
 rowData(ve)
 ``` 
 
-For `VCF` input, Users could also have the opportunity to save the
-sample related annotation info directly into the `VariantExperiment`
-object, by providing the file path to the `sample.info` argument, and
-then retrieve by `colData()`.
+For VCF input, Users could also have the opportunity to save the
+sample related annotation directly into the VariantExperiment object,
+by providing the file path to the 'sample.info' argument, and then
+retrieve by `colData()`.
 
 ```{r, VE vcf sample info, eval=FALSE}
 sampleInfo <- system.file("extdata", "Example_sampleInfo.txt",
@@ -1133,27 +1134,27 @@ colData(ve)
 ```
 
 Most of the argument are same as the
-`makeSummarizedExperimentFromGDS`, with additional argument of `start`
-and `count` to specify the start position and number of variants to
-read into `VariantExperiment` object.
+`makeSummarizedExperimentFromGDS`, with additional argument of 'start'
+and 'count' to specify the start position and number of variants to
+read into VariantExperiment object.
 
 ```{r, makeSummarizedExperimentFromVCFArgs_startCount, eval=FALSE}
 ve2 <- makeSummarizedExperimentFromVCF(vcf, start=101, count=1000)
-ve2
+dim(ve2)
 ```
 For the above example, only 1000 variants are read into the
-`VariantExperiment` object, starting from the position of 101. 
+VariantExperiment object, starting from the position of 101. 
 
-The support of `VCFArray` in the coercion method of
-`makeSummarizedExperimentFromVCF(useVCFArray = TRUE)` is supported
-now. This will read the variant call data and metadata from `VCF`
-file, and construct into `VCFArray` for the assay data slot and the
-`DelayedDataFrame` for the `rowData` and `colData` slots, with columns
-being `VCFArray` objects.
+The support of VCFArray in the coercion method of
+`makeSummarizedExperimentFromVCF(useVCFArray = TRUE)` is under work
+now. This will read the variant call data and metadata from VCF file,
+and construct into VCFArray for the assay slot and the
+DelayedDataFrame for the rowData and colData slots, with columns being
+VCFArray objects.
 
-Since the `VCFArray` was written internally using `VariantAnnotation`,
-we are still working to enable the statistical funtions and methods on
-the `VariantExperiment` objects with `VCF` backends. 
+Since the VCFArray was written internally using [VariantAnnotation][],
+we are also working to enable the statistical funtions and methods on
+the VariantExperiment objects with VCF backends. 
 	
 ### Basic methods
 
