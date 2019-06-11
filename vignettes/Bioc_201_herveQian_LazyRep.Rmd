@@ -1185,15 +1185,15 @@ ve1
 
 ### Save / load `VariantExperiment` object
 
-Note that the operations on `VariantExperiment` are delayed.  So after
-subsetting by `[`, `$` or `Ranged-based` operations, and you feel
+Note that the operations on VariantExperiment are delayed.  So after
+subsetting by '[', '$' or Ranged-based operations, and you feel
 satisfied with the data for downstream analysis, you need to save that
-`VariantExperiment` object to synchronize the on-disk file (in `GDS`
-or `VCF` format) that is associated with the subset of data (in-memory
+VariantExperiment object to synchronize the on-disk file (in GDS or
+VCF format) that is associated with the subset of data (in-memory
 representation) before any statistical analysis. Otherwise, an error
 will be returned.
 
-For example, after we subset the `ve` by `GRanges("22:1-48958933")`,
+For example, after we subset the 've' by 'GRanges("22:1-48958933")',
 and we want to calculate the hwe based on the 23 variants, an error
 will be generated indicating that we need to sync the on-disk and
 in-memory representations.
@@ -1205,7 +1205,7 @@ hwe(ve1)
 ##   in-memory representations
 ```
 
-Use the function `saveVariantExperiment` to synchronize the on-disk
+Use the function `saveVariantExperiment()` to synchronize the on-disk
 and in-memory representation, and reload into the same _R_ session.
 
 ```{r, VE save, eval=FALSE}
@@ -1215,10 +1215,10 @@ ve1
 gdsfile(ve1)
 ```
 
-Or use `loadVariantExperiment` function to reload any synchronized
-`VariantExperiment` object. The gds file path to the new
-`VariantExperiment` object will be the `se.gds` in the specified
-directory `a`.
+You can also use `loadVariantExperiment()` function to explicitly
+reload any synchronized VariantExperiment object. The gds file path
+to the new VariantExperiment object will be the 'se.gds' in the
+specified directory.
 
 ```{r, VE load, eval=FALSE}
 ve2 <- loadVariantExperiment(dir=a)
