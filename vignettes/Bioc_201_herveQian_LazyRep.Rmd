@@ -1043,6 +1043,8 @@ available on _R/Bioconductor_.
 [VariantExperiment]: https://bioconductor.org/packages/VariantExperiment 
 [SummarizedExperiment]: https://bioconductor.org/packages/SummarizedExperiment
 [SingleCellExperiment]: https://bioconductor.org/packages/SingleCellExperiment
+[SeqArray]: https://bioconductor.org/packages/SeqArray
+[SeqVarTools]: https://bioconductor.org/packages/SeqVarTools
 
 ### `VariantExperiment` class
 VariantExperiment class is defined to extend the SummarizedExperiment
@@ -1233,16 +1235,13 @@ head(hwe(ve1))
 
 ### Statistical methods
 
-With `GDS` backend, Many statistical functions and methods are defined on
-`VariantExperiment` objects, most of which has their generic defined
-in _Bioconductor_ package of `SeqArray` and `SeqVarTools`. These
-functions could be called directly on `VariantExperiment` object as
-input, with additional arguments to specify based on user's need. More
-details please refer to the vignettes of [SeqArray][] and
-[SeqVarTools][].
-
-[SeqArray]: https://bioconductor.org/packages/SeqArray
-[SeqVarTools]: https://bioconductor.org/packages/SeqVarTools
+With GDS backend, Many statistical functions and methods are defined
+on VariantExperiment objects, most of which has their generic
+defined in _Bioconductor_ package of [SeqArray][] and
+[SeqVarTools][]. These functions could be called directly on
+VariantExperiment objects as input, with additional arguments to
+specify based on user's need. More details please refer to the
+vignettes of [SeqArray][] and [SeqVarTools][].
 
 Here is a list of the statistical functions with brief description:
 
@@ -1285,5 +1284,5 @@ titv(ve, by.sample=FALSE)
 ## countSingletons
 countSingletons(ve)
 ```
-## examples? use case?
+
 
