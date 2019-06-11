@@ -1158,9 +1158,10 @@ the VariantExperiment objects with VCF backends.
 	
 ### Basic methods
 
-Consistent with `SummarizedExperiment`, The `VariantExperiment` object
-supports `[` subsetting. The `$` subsetting could also be operated
-directly on `colData()` columns, for easy sample extraction.
+Consistent with SummarizedExperiment, The VariantExperiment supports
+`[` subsetting with numeric, logical and character indexes. The '$'
+subsetting could also be operated directly on `colData()` columns, for
+easy sample extraction.
 
 - `[` and `$` subsetting
 
@@ -1173,10 +1174,9 @@ ve[as.logical(rowData(ve)$REF == "T"),]
 
 - Range-based operations
 
-`VariantExperiment` objects support all of the `findOverlaps()`
-methods and associated functions.  This includes `subsetByOverlaps()`,
-which makes it easy to subset a `VariantExperiment` object by an
-interval.
+VariantExperiment supports all of the `findOverlaps()` methods and
+associated functions.  This includes `subsetByOverlaps()`, which makes
+it easy to subset a VariantExperiment object by an interval.
 
 ```{r, VE subset by overlap, eval=FALSE}
 ve1 <- subsetByOverlaps(ve, GRanges("22:1-48958933"))
