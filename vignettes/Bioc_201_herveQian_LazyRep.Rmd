@@ -91,9 +91,9 @@ library(SeqArray)
 library(GDSArray)
 library(VCFArray)
 library(DelayedDataFrame)
-library(SQLDataFrame) ## depends on "dplyr", and "dbplyr"
+library(SQLDataFrame) 
 library(VariantAnnotation)
-## library(VariantExperiment)  ## depends on "DelayedDataFrame", and "GDSArray"
+## library(VariantExperiment) 
 ```
 
 
@@ -414,18 +414,6 @@ tomorrow June 7th.)
   file.
 ```{r, gdsfileAccessor}
 gdsfile(gf)
-```
-
-#### seed contract
-
-`GDSArray` follows the seed contract for `DelayedArray` extension, and
-  supports the `dim`, `dimnames` methods.
-
-```{r, GDSArray seed contract}
-ga <- GDSArray(file, "genotype/data")
-seed(ga)
-dim(ga)
-lengths(dimnames(ga))
 ```
 
 #### methods
