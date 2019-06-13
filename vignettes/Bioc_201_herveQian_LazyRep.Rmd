@@ -40,19 +40,19 @@ options(showTailLines=3)
 
 ## Workshop Description
 
-In this workshop, we will learn the lazy representations and
-interfaces in _R/Bioconductor_, as well as the application in the real
-data analysis. We will use some real data examples generated from
-DNA/RNA-seq, to demonstrate the representation and comprehension of
-large scale (out-of-memory) genomic datasets. The workshop will be
-mainly instructor-led live demo with completely working
-examples. Instructions and notes will be included.
+In this workshop, we will learn about _Bioconductor_ data containers that
+use lazy data representations and their application in real data analysis.
+We will use some real data examples generated from DNA/RNA-seq, to
+demonstrate the representation and comprehension of large scale
+(out-of-memory) genomic datasets. The workshop will be mainly instructor-led
+live demo with completely working examples. Instructions and notes will be
+included.
 
 ## Pre-requisites
 
 - Basic knowledge of R syntax (`matrix`, `array`, `data.frame`, etc.)
-- Knowledge of the `DelayedArray` class (Hervé?)
-- Familiarity with `SummarizedExperiment` class
+- Some familiarity with manipulation of S4 objects in general
+- Some familiarity with `SummarizedExperiment` objects
 
 ## Workshop Participation
 
@@ -64,7 +64,7 @@ code chunks.
 
 Activity | Time 
 ---------|------
-DelayedArray and about   | 50m  (**to be modified by Hervé**)
+DelayedArray and HDF5Array objects | 50m
 Specialized DelayedArray backends | 14m
 DelayedDataFrame | 10m 
 SQLDataFrame (&examples?) | 10m
@@ -98,7 +98,7 @@ library(VariantAnnotation)
 
 
 
-## DelayedArray objects
+## DelayedArray and HDF5Array objects
 
 
 ### What is a DelayedArray object?
@@ -174,13 +174,13 @@ sum(A3)
 
 ### Operations on DelayedArray objects
 
-Operations on a DelayedArray object are either `delayed` or `block-processed`.
+Operations on a DelayedArray object are either _delayed_ or _block-processed_.
 
 #### Delayed operations
 
-For example the `+ 1` and `log` operations in `A3 <- log(A2 + 1)` are delayed.
-This means that they are very fast and produce a new DelayedArray object
-with the same seed as the input object:
+For example the `+ 1` and `log` operations in `A3 <- log(A2 + 1)` are
+_delayed_. This means that they are very fast and produce a new DelayedArray
+object with the same seed as the input object:
 
 ```{r}
 seed(A3)
@@ -196,7 +196,7 @@ object.size(A3)
 showtree(A3)
 ```
 
-The only difference between `A2` and `A3` is that `A3` now carries delayed
+The only difference between `A2` and `A3` is that `A3` now carries _delayed_
 operations.
 
 We could keep going:
@@ -206,7 +206,7 @@ M <- t(A3[ , 1:20, 5])
 M
 ```
 
-The seed is still the same. This only adds more delayed operations to be
+The seed is still the same. This only adds more _delayed_ operations to be
 applied to it:
 
 ```{r}
@@ -221,13 +221,39 @@ An important principle: The seed of a DelayedArray object is **always**
 treated as a _read-only_ object so will never be modified by the operations
 we perform on the object.
 
-#### Block-processed operations
+Summary of _delayed_ operations supported on DelayedArray objects:
+
+Operation | Comment
+----------|------
+`rbind`, `cbind` | none
+All the members of the `Ops` group | e.g. `+`, `-`, `==`, `<`, etc...
+All the members of the `Math` and `Math2` groups | e.g. `log`, `floor`, etc...
+`sweep` | none
+`!` | none
+`is.na`, `is.finite`, `is.infinite`, `is.nan` | none
+`lengths` | only meaningful when object is of type `list`
+`nchar`, `tolower`, `toupper`, `grepl`, `sub`, `gsub` | none
+`pmax2` and `pmin2` | replacements for `base::pmax` and `base::pmin`
+`dnorm`, `dbinom`, `dpois`, `dlogis` | ... and related functions
+
+#### Realization
 
 TODO (by Hervé)
 
-- Refer to _DelayedMatrixStats_ package for more matrix summarization
-  operations on DelayedMatrix objects.
+#### Block-processed operations
 
+When operations are not _delayed_ they are _block-processed_.
+
+TODO (by Hervé): expnd this
+
+Summary of _block-processed_ operations supported on DelayedArray objects:
+
+Operation | Comment
+----------|--------
+ |
+
+TODO (by Hervé): Refer to _DelayedMatrixStats_ package for more matrix
+summarization operations on DelayedMatrix objects.
 
 ### In-memory vs on-disk objects
 
