@@ -91,7 +91,7 @@ library(SeqArray)
 library(GDSArray)
 library(VCFArray)
 library(DelayedDataFrame)
-#library(SQLDataFrame) ## depends on "dplyr", and "dbplyr"
+library(SQLDataFrame) ## depends on "dplyr", and "dbplyr"
 library(VariantAnnotation)
 ## library(VariantExperiment)  ## depends on "DelayedDataFrame", and "GDSArray"
 ```
@@ -643,13 +643,13 @@ ddf[[3]]
 
 ```{r ddfRbind}
 ddf2 <- ddf[21:40, ]
-(ddfrb <- rbind(ddf1, ddf2))
+(ddfrb <- rbind(ddf, ddf2))
 ```
 
 - cbind
 
 ```{r, ddfCbind, error=FALSE}
-(ddfcb <- cbind(varid = ddf1[,2, drop=FALSE], AA=ddf1[, 3, drop=FALSE]))
+(ddfcb <- cbind(varid = ddf[,2, drop=FALSE], AA=ddf[, 3, drop=FALSE]))
 ```
 
 ### DEVELOPERS ONLY: `lazyIndex` slot
@@ -710,7 +710,7 @@ NOTE that, with `rbind`-ing, the `lazyIndex` of input arguments will
 also be realized and a new `DelayedDataFrame` with NULL lazyIndex will
 be returned.
 
-```{r ddfRbind}
+```{r ddfRbind2}
 lazyIndex(ddf1)
 lazyIndex(ddf2)
 lazyIndex(rbind(ddf1, ddf2))
@@ -720,7 +720,7 @@ While `cbind`-ing of`DelayedDataFrame` objects will keep all existing
 `lazyIndex` of input arguments and carry into the new
 `DelayedDataFrame` object.
 
-```{r, ddfCbind, error=FALSE}
+```{r, ddfCbind2, error=FALSE}
 lazyIndex(ddfcb)
 ```
 
