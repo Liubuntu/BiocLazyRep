@@ -657,9 +657,9 @@ and `cbind` methods, etcs.
 - subsetting
 
 ```{r ddfMethods}
-ddf[, 1, drop=FALSE]  ## integer subscripts
-ddf[, "AA", drop=FALSE]  ## character subscripts
-ddf[, c(TRUE,FALSE)]  ## logical subscripts
+ddf[, 1, drop=FALSE]  #> integer subscripts
+ddf[, "AA", drop=FALSE]  #> character subscripts
+ddf[, c(TRUE,FALSE)]  #> logical subscripts
 
 ddf[["AA"]]
 ddf[[3]]
@@ -668,8 +668,9 @@ ddf[[3]]
 - rbind
 
 ```{r ddfRbind}
+ddf1 <- ddf[1:20,]
 ddf2 <- ddf[21:40, ]
-(ddfrb <- rbind(ddf, ddf2))
+(ddfrb <- rbind(ddf1, ddf2))
 ```
 
 - cbind
@@ -711,7 +712,7 @@ the same as `ddf`. But the subsetting operation was recorded in the
 `delayed`.
 
 ```{r, lazyIndex}
-ddf1 <- ddf[1:20,]
+#> ddf1 <- ddf[1:20,]
 identical(ddf@listData, ddf1@listData)
 lazyIndex(ddf1)
 nrow(ddf1)
@@ -736,7 +737,7 @@ NOTE that, with `rbind`-ing, the `lazyIndex` of input arguments will
 also be realized and a new `DelayedDataFrame` with NULL lazyIndex will
 be returned.
 
-```{r ddfRbind2}
+```{r ddfRbind_lazyIndex}
 lazyIndex(ddf1)
 lazyIndex(ddf2)
 lazyIndex(rbind(ddf1, ddf2))
@@ -746,7 +747,7 @@ While `cbind`-ing of`DelayedDataFrame` objects will keep all existing
 `lazyIndex` of input arguments and carry into the new
 `DelayedDataFrame` object.
 
-```{r, ddfCbind2, error=FALSE}
+```{r, ddfCbind_lazyIndex, error=FALSE}
 lazyIndex(ddfcb)
 ```
 
