@@ -614,14 +614,14 @@ DelayedDataFrame (with option to save as ordinary DataFrame). There
 are coercion methods defined for both VCF and GDS files into
 VariantExperiment objects.
 
-The coercion function of `makeSummarizedExperimentFromGDS` coerces GDS
+The coercion function of `makeVariantExperimentFromGDS` coerces GDS
 files into VariantExperiment objects directly, with the assay data
 saved as GDSArray, and the rowData / colData in DelayedDataFrame
 by default (with the option of ordinary DataFrame object).
 
 ```{r, VE gds constructor, eval=FALSE}
 gds <- SeqArray::seqExampleFileName("gds")
-ve <- makeSummarizedExperimentFromGDS(gds)
+ve <- makeVariantExperimentFromGDS(gds)
 ve
 ```
 ```{r, VE gds accessors, eval=FALSE}
@@ -632,7 +632,7 @@ colData(ve)
 
 ### Constructor
 
-Arguments in `makeSummarizedExperimentfromGDS()` could be specified to
+Arguments in `makeVariantExperimentFromGDS()` could be specified to
 take only certain annotation columns for features and samples. All
 available data entries for arguments values could be retrieved by the
 `showAvailable()` function with the gds file name as input.
@@ -646,12 +646,12 @@ inside the rowData, with the prefix of 'info_'. 'rowDataOnDisk' and
 'colDataOnDisk' could be set as 'FALSE' to save all metadata in
 ordinary DataFrame format.
 
-```{r, makeSummarizedExperimentFromGDSArgs, eval=FALSE}
-ve3 <- makeSummarizedExperimentFromGDS(gds,
-                                       rowDataColumns = c("ID", "ALT", "REF"),
-                                       infoColumns = c("AC", "AN", "DP"),
-                                       rowDataOnDisk = TRUE,
-                                       colDataOnDisk = FALSE)
+```{r, makeVariantExperimentFromGDSArgs, eval=FALSE}
+ve3 <- makeVariantExperimentFromGDS(gds,
+                                    rowDataColumns = c("ID", "ALT", "REF"),
+                                    infoColumns = c("AC", "AN", "DP"),
+                                    rowDataOnDisk = TRUE,
+                                    colDataOnDisk = FALSE)
 rowData(ve3)  #> DelayedDataFrame object
 colData(ve3)  #> DataFrame object
 ```
@@ -663,14 +663,14 @@ If the VariantExperiment object is based on GDS backend, then the function
 gdsfile(ve)
 ```
 
-The `makeSummarizedExperimentFromVCF()` function (by default) converts
+The `makeVariantExperimentFromVCF()` function (by default) converts
 the VCF file into a GDS file (internally using
 `SeqArray::seqVCF2GDS`), and then construct a VariantExperiment object
 with the GDS file as backend.
 
 ```{r, VE vcf constructor, eval=FALSE}
 vcf <- SeqArray::seqExampleFileName("vcf")
-ve <- makeSummarizedExperimentFromVCF(vcf)
+ve <- makeVariantExperimentFromVCF(vcf)
 ve
 gdsfile(ve)
 ```
@@ -691,24 +691,24 @@ retrieve by `colData()`.
 ```{r, VE vcf sample info, eval=FALSE}
 sampleInfo <- system.file("extdata", "Example_sampleInfo.txt",
                           package="VariantExperiment")
-ve <- makeSummarizedExperimentFromVCF(vcf, sample.info = sampleInfo)
+ve <- makeVariantExperimentFromVCF(vcf, sample.info = sampleInfo)
 colData(ve)
 ```
 
 Most of the argument are same as the
-`makeSummarizedExperimentFromGDS`, with additional argument of 'start'
+`makeVariantExperimentFromGDS`, with additional argument of 'start'
 and 'count' to specify the start position and number of variants to
 read into VariantExperiment object.
 
-```{r, makeSummarizedExperimentFromVCFArgs_startCount, eval=FALSE}
-ve2 <- makeSummarizedExperimentFromVCF(vcf, start=101, count=1000)
+```{r, makeVariantExperimentFromVCFArgs_startCount, eval=FALSE}
+ve2 <- makeVariantExperimentFromVCF(vcf, start=101, count=1000)
 dim(ve2)
 ```
 For the above example, only 1000 variants are read into the
 VariantExperiment object, starting from the position of 101. 
 
 The support of VCFArray in the coercion method of
-`makeSummarizedExperimentFromVCF(useVCFArray = TRUE)` is under work
+`makeVariantExperimentFromVCF(useVCFArray = TRUE)` is under work
 now. This will read the variant call data and metadata from VCF file,
 and construct into VCFArray for the assay slot and the
 DelayedDataFrame for the rowData and colData slots, with columns being
