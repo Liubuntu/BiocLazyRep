@@ -872,7 +872,7 @@ signicantly less memory than in-memory _R/Bioconductor_ alternatives.
 [GDSArray]: https://bioconductor.org/packages/GDSArray
 [HDF5Array]: https://bioconductor.org/packages/HDF5Array
 	
-### `DelayedDataFrame` class
+### DelayedDataFrame class
 
 DelayedDataFrame extends the DataFrame data structure, and has
 similar behavior in terms of construction, subsetting, splitting,
@@ -969,6 +969,8 @@ lazyIndex(ddf1)
 nrow(ddf1)
 ```
 
+- coercion 
+
 Only when direct realization call is invoked, (e.g., `DataFrame()`, or
 `as.list()`, the lazyIndex will be realized and the object of new
 class returned. 
@@ -983,6 +985,8 @@ df1@listData
 dim(df1)
 ```
 
+- rbind
+
 NOTE that, with `rbind`-ing, the lazyIndex of input arguments will
 also be realized and a new DelayedDataFrame with NULL lazyIndex will
 be returned.
@@ -992,6 +996,8 @@ lazyIndex(ddf1)
 lazyIndex(ddf2)
 lazyIndex(rbind(ddf1, ddf2))
 ```
+
+- cbind 
 
 While 'cbind'-ing DelayedDataFrame objects will keep all existing
 lazyIndex of input arguments and carry into the new DelayedDataFrame
