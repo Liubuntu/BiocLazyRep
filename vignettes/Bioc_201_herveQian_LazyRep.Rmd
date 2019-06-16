@@ -64,18 +64,19 @@ code chunks.
 
 Activity | Time 
 ---------|------
-DelayedArray and HDF5Array objects | 50m
-Specialized DelayedArray backends | 14m
+DelayedArray and HDF5Array objects | 40m
+Specialized DelayedArray backends | 10m
+VariantExperiment | 20m
 DelayedDataFrame | 10m 
-SQLDataFrame (&examples?) | 10m
-VariantExperiment & examples | 16m
-
+SQLDataFrame | 10m
+Future directions | 5-10m
+	
 ## Learning objectives
 - Create `DelayedArray` with different backends (**to be modified by Hervé**)
-- Use 
+- Use `VariantExperiment` to represent your DNA-seq data. 
+- Statistical analysis of variant data (VCF) using `VariantExperiment`.
 - Create `SQLDataFrame` from in-memory data, text format file, and database tables. 
 - Use `SQLDataFrame` to represent and manipulate godb database tables.
-- Statistical analysis of variant data (VCF) using `VariantExperiment`.
 		
 ##  _R/Bioconductor_ packages 
 
