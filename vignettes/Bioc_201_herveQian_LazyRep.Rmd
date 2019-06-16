@@ -295,7 +295,7 @@ TODO (by Hervé)
 
 
 
-### Extension of `DelayedArray` with GDS backend
+### Extension of DelayedArray with GDS backend
 
 #### CoreArray and Genomic Data Structure
 
@@ -308,11 +308,11 @@ provided a high-level R interface for [CoreArray][].
 
 The GDS format has been widely used in genetic/genomic research for
 high-throughput genotyping or sequencing data.  There are two major S3
-classes that extends the basic `gds.class`: `SNPGDSFileClass` (defined
+classes that extends the basic 'gds.class': 'SNPGDSFileClass' (defined
 in [SNPRelate][]) suited for genotyping data (e.g., GWAS), and
 `SeqVarGDSClass` (defined in [SeqArray][]) that are designed
 specifically for DNA-sequencing data. The file format attribute in
-each data class is set as `SNP_ARRAY` and `SEQ_ARRAY`. There are rich
+each data class is set as 'SNP_ARRAY' and 'SEQ_ARRAY'. There are rich
 functions written based on these data classes for common data
 operation and statistical analysis in the R packages of [SNPRelate][]
 and [SeqArray][].
@@ -349,9 +349,9 @@ SeqArray | seqGetData | Get data with a defined filter
 SeqArray | seqApply | Apply a user-defined function over array margins
 SeqArray | seqParallel | Apply a function in parallel
 
-For example, `index.gdsn` will be used to refer to a gds node, and
-`readex.gdsn` is the function to call for subset reading, by providing
-the index node, and the indexes as a list.
+For example, `index.gdsn()` will be used to refer to a gds node, and
+`readex.gdsn()` is the function to call for subset reading, by
+providing the index node, and the indexes as a list.
 
 ```{r, GDSread}
 sample.node <- index.gdsn(g1, "sample.id")
@@ -369,40 +369,40 @@ These functions corresponds to the GDS data structure and works best
  require much efforts from users in order to make full use of these
  packages.
 
-#### `GDSArray`, `GDSMatrix`, and `GDSFile`
+#### GDSArray, GDSMatrix, and GDSFile
 
 To fully make use of the GDS format, and at the same time, to provide
 users a familiar interface with common operations and methods within
 the _R/Bioconductor_ ecosystem, We have developed the package of
-[GDSArray][] to represent GDS files as `DelayedArray` instances. It
+[GDSArray][] to represent GDS files as DelayedArray instances. It
 obeys the seed contract of [DelayedArray][] by supporting `dim`,
 `dimnames` methods, and inherits array-like operations and methods
-from `DelayedArray`, e.g., the subsetting method of `[`.
+from DelayedArray, e.g., the subsetting method of `[`.
 
 The `GDSArray()` constructor takes arguments for the GDS file path and
-the GDS node name, with one `GDSArray` object only representing one
+the GDS node name, with one GDSArray object only representing one
 GDS node. The `GDSArray()` built from GDS file always returns with
 rows being "features" (genes / variants / snps) and the columns being
 "samples", which is consistent with the assay data inside
-`SummarizedExperiment` and easy to fit into a `SummarizedExperiment`
+SummarizedExperiment and easy to fit into a SummarizedExperiment
 object.
 
 ```{r, GDSArray}
 file <- SeqArray::seqExampleFileName("gds")
 GDSArray(file, "genotype/data")
 ```
-Note that a `GDSMatrix` will be returned by default for 2-dimensional
-`GDSArray`. 
+Note that a GDSMatrix will be returned by default for 2-dimensional
+GDSArray. 
 
 ```{r, GDSMatrix}
 GDSArray(file, "phase/data")
 ```
 
-The `GDSFile` is a light-weight class to represent GDS files. It has
+The 'GDSFile' is a light-weight class to represent GDS files. It has
 the `$` completion method to complete any possible gds nodes. It could
-be used as a convenient `GDSArray` constructor if the slot of
-`current_path` in `GDSFile` object represents a valid gds node.
-Otherwise, it will return the `GDSFile` object with an updated
+be used as a convenient GDSArray constructor if the slot of
+`current_path` in GDSFile object represents a valid gds node.
+Otherwise, it will return the GDSFile object with an updated
 `current_path`.
 
 ```{r, GDSFile}
@@ -410,11 +410,11 @@ gf <- GDSFile(file)
 gf$annotation$info
 gf$annotation$info$AC
 ```
-Try typing in `gf$ann` and pressing `tab` key for the
-auto-completion. (Changes made in `GDSArray`, wait for new build
+Try typing in `gf$ann` and pressing tab key for the
+auto-completion. (Changes made in GDSArray, wait for new build
 tomorrow June 7th.)
 
-`gdsfile` function returns the file path of the corresponding GDS
+`gdsfile()` function returns the file path of the corresponding GDS
   file.
 ```{r, gdsfileAccessor}
 gdsfile(gf)
@@ -422,7 +422,7 @@ gdsfile(gf)
 
 #### methods
 
-`GDSArray` instances can be subset, following the usual _R_
+GDSArray instances can be subset, following the usual _R_
 conventions, with numeric or logical vectors; logical vectors are
 recycled to the appropriate length.
 
@@ -441,16 +441,16 @@ dp[rowMeans(dp) < 60, ]
 
 **Summary:**
 
-`GDSArray` represents GDS file as objects derived from `DelayedArray`
-class. It converts a GDS node in the file to a `DelayedArray` derived
+GDSArray represents GDS file as objects derived from DelayedArray
+class. It converts a GDS node in the file to a DelayedArray derived
 data structure. The rich common methods and data operations defined on
-`GDSArray` makes it more R-user-friendly than working with the GDS
-file directly.
+GDSArray makes it more R-user-friendly than working with the GDS file
+directly.
 
 The array data from GDS files are always returned with the first
 dimension being "variants/snps" and the second dimension being
 "samples". This feature is consistent with the assay data saved in
-`SummarizedExperiment`, and makes the `GDSArray` package easily
+SummarizedExperiment, and makes the [GDSArray][] package easily
 interoperable with other established _Bioconductor_ data
 infrastructure and methods.
 
@@ -473,29 +473,29 @@ structure. The backend VCF file could either be saved on-disk locally
 or remote as online resources. Supported data entries include the
 fixed data fields (REF, ALT, QUAL, FILTER), information field (e.g.,
 AA, AF...), and the individual format field (e.g., GT, DP, etc.). Full
-list of supported data entries could be retrieved by `vcfFields`
+list of supported data entries could be retrieved by `vcfFields()`
 method (see details below).
 
 The array data generated from fixed/information fields are
-one-dimensional`VCFArray`, with the dimension being the length of the
-variants. The array data generated from individual `FORMAT` field are
-always returned with the first dimension being `variants` and the
-second dimension being `samples`. This feature is consistent with the
-assay data saved in `SummarizedExperiment`, and makes the `VCFArray`
+one-dimensional VCFArray, with the dimension being the length of the
+variants. The array data generated from individual FORMAT field are
+always returned with the first dimension being 'variants' and the
+second dimension being 'samples'. This feature is consistent with the
+assay data saved in SummarizedExperiment, and makes the [VCFArray][]
 package easily interoperable with other established _Bioconductor_
 data infrastructure.
  
 [VCFArray]: https://bioconductor.org/packages/VCFArray
 
-#### `vcfFields()`
+#### vcfFields()
 
 The `vcfFields()` method takes the character string (VCF file path),
-`VcfFile` object or `RangedVcfStack` object as input, and returns a
+'VcfFile' object or 'RangedVcfStack' object as input, and returns a
 CharacterList with all available VCF fields within specific
-categories. Users should consult the `fixed`, `info` and `geno`
+categories. Users should consult the 'fixed', 'info' and 'geno'
 category for available data entries that could be converted into
-`VCFArray` instances. The data entry names can be used as input for
-the `name` argument in `VCFArray` constructor.
+VCFArray instances. The data entry names can be used as input for
+the 'name' argument in VCFArray constructor.
 
 ```{r avail, message=FALSE}
 args(VCFArray)
@@ -504,15 +504,15 @@ library(VariantAnnotation)
 vcfFields(fl)
 ```
 
-#### `VCFArray`, `VCFMatrix` and `vcffile()`
+#### VCFArray, VCFMatrix and vcffile()
 
-We can construct the `VCFArray` object from the same input as
+We can construct the VCFArray object from the same input as
 `vcfFields()` methods (the character string for VCF file path,
-`VcfFile` object or `RangedVcfStack` object). 
+'VcfFile' object or 'RangedVcfStack' object). 
 
-With a simplest example, we can construct a `VCFArray` object for the
-`GT` data entry in the provided VCF file with arguments of `file` and
-`name` only.
+With a simplest example, we can construct a VCFArray object for the
+'GT' data entry in the provided VCF file with arguments of 'file' and
+'name' only.
 
 ```{r VCFArray constructor}
 ## character string
@@ -553,11 +553,12 @@ va <- VCFArray(chr22url, vindex =chr22url.tbi, name = "GT")
 #### methods
 
 We can use `vcffile()` to return the backend vcf file that is related
-to each `VCFArray` object. And the `VCFArray` supports the `[`
+to each VCFArray object. And the VCFArray supports the `[`
 subsetting with numeric, logical, and character subscripts. Basic
-calculations are also supported by the `DelayedArray`.
+calculations are also supported by the DelayedArray.
 
 ```{r, VCFArray methods}
+va <- VCFArray(file = fl, name = "GT")
 vcffile(va)
 
 va[1:3, 1:3]
@@ -570,7 +571,7 @@ log(ds+5)
 
 
 
-## `VariantExperiment` container for lazy infrastructures
+## VariantExperiment container for lazy infrastructures
 
 ### Introduction
 [VariantExperiment][] is a _Bioconductor_ package that directly
@@ -579,7 +580,7 @@ sequencing data (with metadata) with backends of VCF or GDS formats.
 
 The high-throughput genetic/genomic assay data are saved as
 [GDSArray][] or [VCFArray][] objects. In addition, the metadata for
-features and samples (`rowData` and `colData`) are saved as
+features and samples (rowData and colData) are saved as
 [DelayedDataFrame][] objects. So [VariantExperiment][] has enabled the
 on-disk representation of both assay data and metadata. It uses
 significantly less memory than in-memory R alternatives. So it is a
@@ -598,7 +599,7 @@ available on _R/Bioconductor_.
 [SeqArray]: https://bioconductor.org/packages/SeqArray
 [SeqVarTools]: https://bioconductor.org/packages/SeqVarTools
 
-### `VariantExperiment` class
+### VariantExperiment class
 VariantExperiment class is defined to extend the SummarizedExperiment
 class. The difference would be that the assay data are saved as
 GDSArray or VCFArray, and the metadata are saved by default as
@@ -606,10 +607,10 @@ DelayedDataFrame (with option to save as ordinary DataFrame). There
 are coercion methods defined for both VCF and GDS files into
 VariantExperiment objects.
 
-The coercion function of `makeVariantExperimentFromGDS` coerces GDS
+The coercion function of `makeVariantExperimentFromGDS()` coerces GDS
 files into VariantExperiment objects directly, with the assay data
-saved as GDSArray, and the rowData / colData in DelayedDataFrame
-by default (with the option of ordinary DataFrame object).
+saved as GDSArray, and the rowData / colData in DelayedDataFrame by
+default (with the option of ordinary DataFrame object).
 
 ```{r, VE gds constructor, eval=FALSE}
 gds <- SeqArray::seqExampleFileName("gds")
@@ -737,7 +738,7 @@ ve1 <- subsetByOverlaps(ve, GRanges("22:1-48958933"))
 ve1
 ```
 
-### Save / load `VariantExperiment` object
+### Save / load VariantExperiment object
 
 Note that the operations on VariantExperiment are delayed.  So after
 subsetting by '[', '$' or Ranged-based operations, and you feel
@@ -838,7 +839,7 @@ countSingletons(ve)
 ```
 
 
-## `DelayedDataFrame` for delayed representation of metadata 
+## DelayedDataFrame for delayed representation of metadata 
 	
 ### Introduction
 
@@ -849,19 +850,19 @@ _R_-user-friendly array data structure (e.g.,
 genetic/genomic data are now being able to easily loaded and
 manipulated within _R_. However, the metadata for the samples and
 features are also getting unexpectedly larger than before. With an
-ordinary `data.frame` or `DataFrame`, the memory space in _R_ faces
+ordinary data.frame or DataFrame, the memory space in _R_ faces
 challenges in fast and efficient data processing, because most
 available _R_ or _Bioconductor_ packages are developed based on
 in-memory data manipulation.
 
-So we have developed the `DelayedDataFrame`, which uses the familiar
+So we have developed the DelayedDataFrame, which uses the familiar
 _R/Bioconductor_ paradigm, and at the same time, all data (in the unit
 of columns) could be optionally saved on-disk (e.g., in
 [DelayedArray][] structure with any back-end). Common operations like
 constructing, subsetting, splitting, combining could be done using the
-familiar`DataFrame` metaphor. 
+familiarDataFrame metaphor. 
 
-This feature of `DelayedDataFrame` could enable efficient on-disk
+This feature of DelayedDataFrame could enable efficient on-disk
 reading and processing of the large-scale annotation files, and use
 signicantly less memory than in-memory _R/Bioconductor_ alternatives.
 
@@ -873,13 +874,13 @@ signicantly less memory than in-memory _R/Bioconductor_ alternatives.
 	
 ### `DelayedDataFrame` class
 
-`DelayedDataFrame` extends the `DataFrame` data structure, and has
+DelayedDataFrame extends the DataFrame data structure, and has
 similar behavior in terms of construction, subsetting, splitting,
 combining, rownames setting, and etc.. 
 
-The `DelayedDataFrame` columns supports the [DelayedArray][] (and
-direct extensions). Here we use 1-dimensional `GDSArray` objects as
-example to show the `DelayedDataFrame` characteristics.
+The DelayedDataFrame columns supports the [DelayedArray][] (and
+direct extensions). Here we use 1-dimensional GDSArray objects as
+example to show the DelayedDataFrame characteristics.
 
 
 ```{r, GDSArray constructor}
@@ -889,8 +890,8 @@ varid <- GDSArray(file, "annotation/id")
 AA <- GDSArray(file, "annotation/info/AA")
 ```
 
-We use an ordinary character vector and the `GDSArray` objects to
-construct a `DelayedDataFrame` object.
+We use an ordinary character vector and the GDSArray objects to
+construct a DelayedDataFrame object.
 
 ```{r, DDF construction}
 ddf <- DelayedDataFrame(idx = seq_len(dim(AA)), varid, AA)
@@ -898,8 +899,8 @@ ddf <- DelayedDataFrame(idx = seq_len(dim(AA)), varid, AA)
 
 ### Methods
 
-`DelayedDataFrame` supports for all methods that are available in
-`DataFrame`, including the `[` subsetting, `[[` extraction, `rbind`,
+DelayedDataFrame supports for all methods that are available in
+DataFrame, including the `[` subsetting, `[[` extraction, `rbind`,
 and `cbind` methods, etcs.
 
 - subsetting
@@ -927,18 +928,20 @@ ddf2 <- ddf[21:40, ]
 (ddfcb <- cbind(varid = ddf[,2, drop=FALSE], AA=ddf[, 3, drop=FALSE]))
 ```
 
-### DEVELOPERS ONLY: `lazyIndex` slot
+### DEVELOPERS ONLY
 
-`DelayedDataFrame` uses a slot called `lazyIndex` (in `LazyIndex`
+- lazyIndex slot
+
+DelayedDataFrame uses a slot called lazyIndex (in 'LazyIndex'
 class), to save all the mapping indexes for each column. The
-`LazyIndex` class is defined in the `DelayedDataFrame` package and
-extends the `SimpleList` class. The `listData` slot saves unique
-indexes for all the columns, and the `index` slots saves the position
-of index in `listData` slot for each column in `DelayedDataFrame`
+'LazyIndex' class is defined in the DelayedDataFrame package and
+extends the SimpleList class. The 'listData' slot saves unique
+indexes for all the columns, and the 'index' slots saves the position
+of index in 'listData' slot for each column in DelayedDataFrame
 object. In the above example, with an initial construction of
-`DelayedDataFrame` object, the index for each column will all be NULL,
+DelayedDataFrame object, the index for each column will all be NULL,
 and all 3 columns points the NULL values which sits in the first
-position in `listData` slot of `lazyIndex`.
+position in 'listData' slot of 'lazyIndex'.
 
 ```{r}
 lazyIndex(ddf)
@@ -946,16 +949,16 @@ lazyIndex(ddf)@listData
 lazyIndex(ddf)@index
 ```
 
-Whenever an operation is done (e.g., subsetting), the `listData` slot
-inside the `DelayedDataFrame` stays the same, only the `lazyIndex`
+Whenever an operation is done (e.g., subsetting), the 'listData' slot
+inside the DelayedDataFrame stays the same, only the lazyIndex
 slot will be updated, so that the show method, further statistical
 calculation will be applied to the subsetting data set. 
 
-For example, here we subset the `DelayedDataFrame` object `ddf` to
-keep only the first 5 rows, and see how the `lazyIndex` works. As
-shown in below, after subsetting, the `listData` slot in `ddf1` stays
+For example, here we subset the DelayedDataFrame object `ddf` to
+keep only the first 5 rows, and see how the lazyIndex works. As
+shown in below, after subsetting, the 'listData' slot in `ddf1` stays
 the same as `ddf`. But the subsetting operation was recorded in the
-`lazyIndex` slot, and the slots of `lazyIndex`, `nrows` and `rownames`
+lazyIndex slot, and the slots of 'lazyIndex', 'nrows' and 'rownames'
 (if not NULL) are all updated. So the subsetting operation is kind of
 `delayed`.
 
@@ -967,12 +970,11 @@ nrow(ddf1)
 ```
 
 Only when direct realization call is invoked, (e.g., `DataFrame()`, or
-`as.list()`, the `lazyIndex` will be realized and the object of new
+`as.list()`, the lazyIndex will be realized and the object of new
 class returned. 
 
-For example, when `DelayedDataFrame` is coerced into a `DataFrame`
-object, the `listData` slot will be updated according to the
-`lazyIndex` slot.
+For example, when DelayedDataFrame is coerced into a DataFrame object,
+the 'listData' slot will be updated according to the lazyIndex slot.
 
 
 ```{r ddfCoercion}
@@ -981,8 +983,8 @@ df1@listData
 dim(df1)
 ```
 
-NOTE that, with `rbind`-ing, the `lazyIndex` of input arguments will
-also be realized and a new `DelayedDataFrame` with NULL lazyIndex will
+NOTE that, with `rbind`-ing, the lazyIndex of input arguments will
+also be realized and a new DelayedDataFrame with NULL lazyIndex will
 be returned.
 
 ```{r ddfRbind_lazyIndex}
@@ -991,9 +993,9 @@ lazyIndex(ddf2)
 lazyIndex(rbind(ddf1, ddf2))
 ```
 
-While `cbind`-ing of`DelayedDataFrame` objects will keep all existing
-`lazyIndex` of input arguments and carry into the new
-`DelayedDataFrame` object.
+While 'cbind'-ing DelayedDataFrame objects will keep all existing
+lazyIndex of input arguments and carry into the new DelayedDataFrame
+object.
 
 ```{r, ddfCbind_lazyIndex, error=FALSE}
 lazyIndex(ddfcb)
@@ -1010,39 +1012,39 @@ a digital database based on the relational model of data. Virtually
 all relational databases management systems use Structured Query
 Language (SQL) for querying and maintaining the database.
 
-The **rstudio** team has developed `dbplyr`, to work with remote
-on-disk data stored in databases. It complies with the `dplyr` grammar
-and supports the lazy representation and manipulation of database
-tables.
+The **rstudio** team has developed [dbplyr][], to work with remote
+on-disk data stored in databases. It complies with the [dplyr][]
+grammar and supports the lazy representation and manipulation of
+database tables.
 
-We are introducing an _R/Bioconductor_ package `SQLDataFrame`, which
-was developed on top of the `dbplyr` package. It has a `DataFrame`
+We are introducing an _R/Bioconductor_ package SQLDataFrame, which
+was developed on top of the [dbplyr][] package. It has a DataFrame
 interface, which is familiar to most _R_ users, and supports the
 interoperability with the rich collection of _Bioconductor_ packages
 and workflows for high-throughput genomic data analysis.
 
 NOTE that currently we are only supporting the DBI backend of
-`RSQLite`. But theoretically, we would implement `SQLDataFrame` so
-that users could choose to use different database backends, including
-MySQL, PostgreSQL, MariaDB, and Google's BigQuery, etc. 
+RSQLite. But theoretically, we would implement SQLDataFrame so that
+users could choose to use different database backends, including
+MySQL, PostgreSQL, MariaDB, and Google's BigQuery, etc.
 
 ### SQLDataFrame class
 
 - Constructor
 
-To construct a `SQLDataFrame` object, 3 arguments are needed:
-`dbname`, `dbtable` and `dbkey`. The `dbname` is the file path to the
-database that is on-disk or remote. `dbtable` argument specifies the
-database table name that is going to be represented as `SQLDataFrame`
-object. If only one table is available in the specified database name,
-this argument could be left blank. The `dbkey` argument is used to
-specify the column name in the table which could **uniquely** identify
-all the data observations (rows).
+To construct a SQLDataFrame object, 3 arguments are needed: 'dbname',
+'dbtable' and 'dbkey'. The 'dbname' is the file path to the database
+that is on-disk or remote. 'dbtable' argument specifies the database
+table name that is going to be represented as SQLDataFrame object. If
+only one table is available in the specified database name, this
+argument could be left blank. The 'dbkey' argument is used to specify
+the column name in the table which could **uniquely** identify all the
+data observations (rows).
 
-Note that after reading the database table into `SQLDataFrame`, the
+Note that after reading the database table into SQLDataFrame, the
 key columns will be kept as fixed columns showing on the left hand
-side, with `|` separating key column(s) with the other columns. The
-`ncol`, `colnames`, and corresponding column subsetting will only
+side, with '|' separating key column(s) with the other columns. The
+'ncol', 'colnames', and corresponding column subsetting will only
 apply to the non-key-columns.
 
 
@@ -1075,20 +1077,20 @@ geneids <- SQLDataFrame:::left_join.SQLDataFrame(genes, geneinfo)
 
 - makeSQLDataframe
 
-We could also construct a `SQLDataFrame` object directly from a file
+We could also construct a SQLDataFrame object directly from a file
 name. The `makeSQLDataFrame` function takes input of a in-memory data
 frame or character value of file name for common text files (.csv,
-.txt, etc.), write into database tables, and open as `SQLDataFrame`
-object. Users could provide values for the `dbname` and `dbtable`
-argument. If NULL, default value for `dbname` would be a temporary
-database file, and `dbtable` would be the `basename(filename)` without
+.txt, etc.), write into database tables, and open as SQLDataFrame
+object. Users could provide values for the 'dbname' and 'dbtable'
+argument. If NULL, default value for 'dbname' would be a temporary
+database file, and 'dbtable' would be the `basename(filename)` without
 extension.
 
 **NOTE** that the input file must have one or multiple columns that
 could uniquely identify each observation (row) to be used the
-`dbkey()` for `SQLDataFrame`. Also the file must be rectangular, i.e.,
+`dbkey()` for SQLDataFrame. Also the file must be rectangular, i.e.,
 rownames are not accepted. But users could save rownames as a separate
-column. 
+column.
 
 ```{r}
 aa <- makeSQLDataFrame(geneinfo.df, dbkey = "X_id")
@@ -1109,12 +1111,13 @@ dbtable(aa1)
 - saveSQLDataFrame
 
 With all the methods (`[` subsetting, `rbind`, `*_join`, etc.,)
-provided in the next section, the `SQLDataFrame` always work like a
-lazy representation until users explicitly call the `saveSQLDataFrame`
-function for realization. 
+provided in the next section, the SQLDataFrame always work like a lazy
+representation until users explicitly call the `saveSQLDataFrame()`
+function for realization.
 
-It's also recommended that users call `saveSQLDataFrame` frequently to
-avoid the slow down in data processing because of too many lazy layers. 
+It's also recommended that users call `saveSQLDataFrame()` frequently
+to avoid the slow down in data processing because of too many lazy
+layers.
 
 ```{r saveSQLDF}
 dbfile <- system.file("extdata/test.db", package = "SQLDataFrame")
@@ -1140,13 +1143,14 @@ also defined to conveniently extract column values.
 head(geneids[[2]])
 head(geneids[["symbol"]])
 ```
-`SQLDataFrame` objects can be subsetted in a similar way of
-`DataFrame` following the usual _R_ conventions, with numeric,
+
+SQLDataFrame objects can be subsetted in a similar way of
+DataFrame following the usual _R_ conventions, with numeric,
 character or logical vectors; logical vectors are recycled to the
 appropriate length. 
 
 **NOTE**, use `drop=FALSE` explicitly for single column subsetting if
-you want to return a `SQLDataFrame` object, otherwise, the default
+you want to return a SQLDataFrame object, otherwise, the default
 `drop=TRUE` would always return a realized value for that column.
 
 ```{r, subsetting}
@@ -1156,7 +1160,7 @@ geneids[c(1, 5, 9), ]
 ```
 
 List style subsetting is also allowed to extract certain columns from
-the `SQLDataFrame` object which returns `SQLDataFrame` by default. 
+the SQLDataFrame object which returns SQLDataFrame by default. 
 
 ```{r}
 geneids[2]  #> list style subsetting
@@ -1166,7 +1170,7 @@ geneids["symbol"]
 #### filter, mutate
 
 We have also enabled the S3 methods of `filter` and `mutate` from
-`dplyr` package, so that users could have the convenience in filtering
+[dplyr][] package, so that users could have the convenience in filtering
 data observations and adding new columns.
 
 ```{r}
@@ -1176,9 +1180,9 @@ geneids %>% mutate(symbol1 = paste0(symbol, "_dup"))
 
 #### union, rbind
 
-To be consistent with `DataFrame`, `union` and `rbind` methods were
-implemented for `SQLDataFrame`, where `union` returns the
-`SQLDataFrame` sorted by the `dbkey(obj)` and unique rows, and `rbind`
+To be consistent with DataFrame, `union` and `rbind` methods were
+implemented for SQLDataFrame, where `union` returns the
+SQLDataFrame sorted by the `dbkey(obj)` and unique rows, and `rbind`
 keeps the original orders of input objects.
 
 ```{r SQLDF_unionRbind}
@@ -1188,7 +1192,7 @@ rbind(geneids[sample(5),], geneids[sample(10,5), ])
 
 #### *_join
 
-The `*_join` family methods was implemented for `SQLDataFrame`
+The `*_join` family methods was implemented for SQLDataFrame
 objects, including the `left_join`, `inner_join`, `semi_join` and
 `anti_join`, which provides the capability of merging database files
 from different sources.
