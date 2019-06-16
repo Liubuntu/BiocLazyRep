@@ -1034,6 +1034,9 @@ RSQLite. But theoretically, we would implement SQLDataFrame so that
 users could choose to use different database backends, including
 MySQL, PostgreSQL, MariaDB, and Google's BigQuery, etc.
 
+[dbplyr]: https://cran.r-project.org/web/packages/dbplyr/ 
+[dplyr]: https://cran.r-project.org/web/packages/dplyr/
+
 ### SQLDataFrame class
 
 - Constructor
