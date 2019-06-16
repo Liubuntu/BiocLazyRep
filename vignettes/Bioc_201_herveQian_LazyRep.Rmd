@@ -550,19 +550,6 @@ chr22url.tbi <- paste0(chr22url, ".tbi")
 va <- VCFArray(chr22url, vindex =chr22url.tbi, name = "GT")
 ```
 
-#### `DelayedArray` seed contract
-
-The `VCFArray` complies the seed contract of the `DelayedArray` by
-supporting the `dim`, `dimnames` methods. 
-
-```{r, VCFArray seedAccessor}
-va <- VCFArray(fl, name = "GT")
-seed(va)
-
-dim(va)
-lapply(dimnames(va), head)
-```
-
 #### methods
 
 We can use `vcffile()` to return the backend vcf file that is related
