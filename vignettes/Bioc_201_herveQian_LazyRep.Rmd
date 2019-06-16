@@ -93,7 +93,10 @@ library(VCFArray)
 library(DelayedDataFrame)
 library(SQLDataFrame) 
 library(VariantAnnotation)
-## library(VariantExperiment) 
+library(org.Hs.eg.db)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(DBI)
+#> library(VariantExperiment) 
 ```
 
 
@@ -423,6 +426,7 @@ conventions, with numeric or logical vectors; logical vectors are
 recycled to the appropriate length.
 
 ```{r, GDSArray methods}
+ga <- GDSArray(file, "genotype/data")
 ga[1:3, 10:15, ]
 ga[c(TRUE, FALSE), , ]
 ```
@@ -1044,8 +1048,8 @@ database that is on-disk or remote. `dbtable` argument specifies the
 database table name that is going to be represented as `SQLDataFrame`
 object. If only one table is available in the specified database name,
 this argument could be left blank. The `dbkey` argument is used to
-specify the column name in the table which could uniquely identify all
-the data observations (rows). 
+specify the column name in the table which could **uniquely** identify
+all the data observations (rows).
 
 Note that after reading the database table into `SQLDataFrame`, the
 key columns will be kept as fixed columns showing on the left hand
@@ -1054,13 +1058,31 @@ side, with `|` separating key column(s) with the other columns. The
 apply to the non-key-columns.
 
 
-```{r constructor}
-dbfile <- system.file("extdata/test.db", package = "SQLDataFrame")
-obj <- SQLDataFrame(
-    dbname = dbfile, dbtable = "colData", dbkey = "sampleID")
-obj
-dim(obj)
-colnames(obj)
+```{r loadOrgdb, message=FALSE}
+org.Hs.eg()
+```
+
+```{r orgdb_construct}
+dbname <- dbfile(org.Hs.eg.db)
+conn <- dbconn(org.Hs.eg.db)
+dbListTables(conn)
+
+geneinfo.df <- dbReadTable(conn, "gene_info")
+head(geneinfo.df)
+#> check uniqueness of "dbkey"
+identical(nrow(geneinfo.df), length(unique(geneinfo.df$X_id)))
+#> construct SQLDataFrame
+geneinfo <- SQLDataFrame(dbname = dbname, dbtable = "gene_info", dbkey = "_id")
+
+genes.df <- dbReadTable(conn, "genes")
+head(genes.df)
+#> check uniqueness of "dbkey"
+identical(nrow(genes.df), length(unique(genes.df$X_id)))
+#> construct SQLDataFrame
+genes <- SQLDataFrame(dbname, "genes", "_id")
+
+#> join to "geneids" with gene name and symbol
+geneids <- SQLDataFrame:::left_join.SQLDataFrame(genes, geneinfo)
 ```
 
 - makeSQLDataframe
@@ -1081,15 +1103,15 @@ rownames are not accepted. But users could save rownames as a separate
 column. 
 
 ```{r}
-mtc <- tibble::rownames_to_column(mtcars)[,1:6]
-aa <- makeSQLDataFrame(mtc, dbkey = "rowname", overwrite = TRUE)
+aa <- makeSQLDataFrame(geneinfo.df, dbkey = "X_id")
 aa
 dbname(aa)
 dbtable(aa)
 
-filename <- file.path(tempdir(), "mtc.csv")
-write.csv(mtc, file= filename, row.names = FALSE)
-aa1 <- makeSQLDataFrame(filename, dbkey = "rowname", sep = ",",
+filename <- file.path(tempdir(), "orgdb_geneinfo.txt")
+write.table(geneinfo.df, file = filename, row.names = FALSE,
+            quote = FALSE, sep="\t")
+aa1 <- makeSQLDataFrame(filename, dbkey = "X_id", sep = "\t",
                        overwrite = TRUE)
 aa1
 dbname(aa1)
@@ -1106,7 +1128,7 @@ function for realization.
 It's also recommended that users call `saveSQLDataFrame` frequently to
 avoid the slow down in data processing because of too many lazy layers. 
 
-```{r}
+```{r saveSQLDF}
 dbfile <- system.file("extdata/test.db", package = "SQLDataFrame")
 obj <- SQLDataFrame(dbname = dbfile, dbtable = "state", dbkey = "state")
 dbname(obj)
@@ -1127,9 +1149,8 @@ realized vector of values from a single column. `$,SQLDataFrame` is
 also defined to conveniently extract column values.
 
 ```{r}
-head(obj[[1]])
-head(obj[["region"]])
-head(obj$size)
+head(geneids[[2]])
+head(geneids[["symbol"]])
 ```
 `SQLDataFrame` objects can be subsetted in a similar way of
 `DataFrame` following the usual _R_ conventions, with numeric,
@@ -1141,19 +1162,17 @@ you want to return a `SQLDataFrame` object, otherwise, the default
 `drop=TRUE` would always return a realized value for that column.
 
 ```{r, subsetting}
-obj[1:3, 1:2]
-obj[c(TRUE, FALSE), c(TRUE, FALSE), drop=FALSE]
-obj[1:3, "population", drop=FALSE]
-obj[, "population"]  ## realized column value
-obj[c("Alabama", "Colorado"), ]
+geneids[sample(100, 5), 1:2]
+geneids[c(TRUE, FALSE), "gene_name", drop=FALSE]
+geneids[c(1, 5, 9), ]
 ```
 
 List style subsetting is also allowed to extract certain columns from
 the `SQLDataFrame` object which returns `SQLDataFrame` by default. 
 
 ```{r}
-obj[1]
-obj["region"]
+geneids[2]  #> list style subsetting
+geneids["symbol"]
 ```
 
 #### filter, mutate
@@ -1163,41 +1182,20 @@ We have also enabled the S3 methods of `filter` and `mutate` from
 data observations and adding new columns.
 
 ```{r}
-obj1 %>% filter(division == "South Atlantic" & size == "medium")
-```
-
-```{r}
-obj1 %>% mutate(p1 = population/10, s1 = size)
+geneids %>% filter(symbol %in% c("AANAT", "ABCA3"))
+geneids %>% mutate(symbol1 = paste0(symbol, "_dup"))
 ```
 
 #### union, rbind
 
 To be consistent with `DataFrame`, `union` and `rbind` methods were
 implemented for `SQLDataFrame`, where `union` returns the
-`SQLDataFrame` sorted by the `dbkey(obj)`, and `rbind` keeps the
-original orders of input objects.
+`SQLDataFrame` sorted by the `dbkey(obj)` and unique rows, and `rbind`
+keeps the original orders of input objects.
 
-```{r}
-dbfile1 <- system.file("extdata/test.db", package = "SQLDataFrame")
-dbfile2 <- system.file("extdata/test1.db", package = "SQLDataFrame")
-ss1 <- SQLDataFrame(dbname = dbfile1, dbtable = "state",
-                    dbkey = c("state"))
-ss2 <- SQLDataFrame(dbname = dbfile2, dbtable = "state1",
-                    dbkey = c("state"))
-ss11 <- ss1[sample(5), ]
-ss21 <- ss2[sample(10, 5), ]
-```
-
-- union
-```{r, eval=FALSE}
-obj1 <- union(ss11, ss21)
-obj1  ## reordered by the "dbkey()"
-```
-
-- rbind
-```{r}
-obj2 <- rbind(ss11, ss21)
-obj2  ## keeping the original order by updating the row index
+```{r SQLDF_unionRbind}
+union(geneids[sample(5),], geneids[sample(10,5), ])  #> unique & sorted
+rbind(geneids[sample(5),], geneids[sample(10,5), ])
 ```
 
 #### *_join
@@ -1207,97 +1205,118 @@ objects, including the `left_join`, `inner_join`, `semi_join` and
 `anti_join`, which provides the capability of merging database files
 from different sources.
 
-```{r}
-ss12 <- ss1[1:10, 1:2]
-ss22 <- ss2[6:15, 3:4]
-left_join(ss12, ss22)
-inner_join(ss12, ss22)
-semi_join(ss12, ss22)
-anti_join(ss12, ss22)
+Here we use a simple example to show that how to use the gene ids to
+match the transcription ids using `*_join` functions, and return a
+table with matching positions for each transcripts. 
+
+```{r SQLDF_tx}
+dbname.tx <- dbfile(TxDb.Hsapiens.UCSC.hg38.knownGene)
+conn.tx <- dbconn(TxDb.Hsapiens.UCSC.hg38.knownGene)
+dbListTables(conn.tx)
+
+txmap <- SQLDataFrame(dbname = dbname.tx,
+                      dbtable = "gene",
+                      dbkey = "_tx_id")
+txchrom <- SQLDataFrame(dbname = dbname.tx,
+                        dbtable = "transcript",
+                        dbkey = "_tx_id")
+txinfo <- left_join(txmap, txchrom)
+txinfo
+geneids
+res <- inner_join(geneids, txinfo)
 ```
 
 ### DEVELOPERS ONLY
 
-To make the `SQLDataFrame` object as light and compact as possible,
-there are only 5 slots contained in the object: `tblData`, `dbkey`,
-`dbnrows`, `dbconcatKey`, `indexes`. Metadata information could be
-returned through these 5 slots using slot accessors or other utility
-functions. 
-```{r}
-slotNames(obj)
-dbname(obj)
-dbtable(obj)
-dbkey(obj)
+To make the SQLDataFrame object as light and compact as possible,
+there are only 5 slots contained in the object: tblData, dbkey,
+dbnrows, dbconcatKey, indexes. Metadata information could be returned
+through these 5 slots using slot accessors or other utility functions.
+
+```{r, SQLDF_developers}
+slotNames(res)
+dbname(res)
+dbtable(res)
+dbkey(res)
 ```
 
-- `tblData` slot
+- tblData slot
 
-The `tblData` slot saves the `dbplyr::tbl_dbi` version of the database
+The tblData slot saves the `dbplyr::tbl_dbi` version of the database
 table, which is a light-weight representation of the database table in
 _R_. Of note is that this lazy tbl only contains unique rows. It could
-also be sorted by the `dbkey(obj)` if the `SQLDataFrame` object was
-generated from `union` or `rbind`. So when the `saveSQLDataFrame()`
-function was called, a database table will be written into a physical
-disk space and have the unique records.
+also be sorted by the dbkey if the SQLDataFrame object was generated
+from `union()` or `rbind()`. So when the `saveSQLDataFrame()` function
+was called, a database table will be written into a physical disk
+space and have the unique records.
 
 Accessor function is made avaible for this slot: 
 ```{r}
-tblData(obj)
+tblData(res)
 ```
 
-`saveSQLDataFrame` write the lazy tbl carried in `tblData` slot into
-an on-disk database table, and re-open the `SQLDataFrame` object from
+`saveSQLDataFrame()` write the lazy tbl carried in tblData slot into
+an on-disk database table, and re-open the SQLDataFrame object from
 the new path.
 
-
-- `dbnrows` and `dbconcatKey`
-The `dbnrows` slot saves the number of rows corresponding to the
-`tblData`, and `dbconcatKey` saves the realized (concatenated if
-multiple) key columns corresponding to the `tblData`. Accessor
-functions are also available for these 2 slots: 
-
-```{r}
-dbnrows(obj)
-dbconcatKey(obj)
+```{r saveSQLDataFrame}
+dbname(res)
+dbtable(res)
+res <- saveSQLDataFrame(res, dbname = tempfile(fileext=".db"),
+                        dbtable = "gene_tx")
+dbname(res)
+dbtable(res)
 ```
 
-- `indexes` slot
-The `indexes` slots is an unnamed list saving the row and column
-indexes respectively corresponding to the `tblData` slot, so that the
-`SQLDataFrame` could possibly have duplicate rows or only a subset of
-data records from the `tblData`, while the `tblData` slot doesn't need
-to be changed. To be consistent, the slots of `dbnrows` and
-`dbconcatKey` will also remain unchanged.
+- dbnrows and dbconcatKey 
+
+The dbnrows slot saves the number of rows corresponding to the
+tblData, and dbconcatKey saves the realized (concatenated if multiple)
+key columns corresponding to the tblData. Accessor functions are also
+available for these 2 slots:
 
 ```{r}
-obj@indexes
-obj_sub <- obj[sample(5, 3, replace = TRUE), 2:3]
-obj_sub
-obj_sub@indexes
-identical(tblData(obj), tblData(obj_sub))
+dbnrows(res)
+head(dbconcatKey(res))
 ```
 
-With a `filter` function (which is similar to `[i, ]` subsetting),
-only the `indexes` slot will be updated for the row index pointing to
-the `tblData`.
+- indexes slot 
+
+The indexes slots is an unnamed list saving the row and column indexes
+respectively corresponding to the tblData, so that the SQLDataFrame
+could possibly have duplicate rows or only a subset of data records
+from the tblData, while the tblData slot doesn't need to be
+changed. To be consistent, the slots of dbnrows and dbconcatKey will
+also remain unchanged.
 
 ```{r}
-obj_filter <- obj %>% filter(division == "South Atlantic" & size == "medium")
-obj_filter@indexes
-identical(tblData(obj), tblData(obj_filter))
+res@indexes
+res_sub <- res[sample(100, 5, replace = TRUE),
+               c("symbol", "tx_name", "tx_start")]
+res_sub
+res_sub@indexes
+identical(tblData(res), tblData(res_sub))
+```
+
+With a `filter()` function (which is similar to [i, ] subsetting),
+only the indexes slot will be updated for the row index pointing to
+the tblData.
+
+```{r}
+res_filter <- res %>% filter(symbol == "A1BG")
+res_filter@indexes
+identical(tblData(res), tblData(res_filter))
 ```
 
 - methods
 
 The `ROWNAMES,SQLDataFrame` method was defined to return the
-(concatenated by `\b` if multiple) key column(s) value, so that the row
-subsetting with character vector works for the `SQLDataFrame` objects.
+(concatenated by '\b' if multiple) key column(s) value, so that the
+row subsetting with character vector works for the SQLDataFrame
+resects.
 
 ```{r}
-obj1 <- SQLDataFrame(dbname = dbfile, dbtable = "state",
-                     dbkey = c("region", "population"))
-
-ROWNAMES(obj1[1:10,])
-obj1[c("South\b3615.0", "West\b365.0"), ]
+head(ROWNAMES(res))
+res[sample(ROWNAMES(res), 5), ]
 ```
 
