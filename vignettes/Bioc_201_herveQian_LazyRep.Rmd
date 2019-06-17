@@ -1565,12 +1565,25 @@ res[sample(ROWNAMES(res), 5), ]
 
 ## Future directions
 
+
+### DelayedArray and related
+
+- Store the dimnames in the HDF5 file.
+
 - DelayedArray is still a work-in-progress (we need more efficient
   block-processing and RleArray objects).
 
+- In particular, DelayedArray backend authors should be able to
+  implement optimized backend-specific methods (e.g. `max`) and
+  the methods for DelayedArray objects should try to take advantage
+  of them instead of triggering block processing.
+
 - Support other on-disk DelayedArray backends (TileDB?)
 
-- Explore other on-disk DataFrame-like objects.
+
+### On-disk DataFrame
+
+- Explore other on-disk DataFrame-like objects (Spark?)
 
 - DataFrame-like classes like SQLDataFrame don't extend DataFrame at
   the moment:
@@ -1581,5 +1594,4 @@ res[sample(ROWNAMES(res), 5), ]
 
     This prevents these objects from being used to store the metadata
     columns of Vector derivatives.
-
 
