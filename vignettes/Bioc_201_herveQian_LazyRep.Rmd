@@ -417,6 +417,7 @@ _block-processed_) supported on DelayedArray objects work on it:
 is(A3, "DelayedArray")
 
 M4 <- t(log(A3[ , , 1] - 0.5))
+M4
 ```
 
 Note that `M4` is no longer an RleArray instance:
