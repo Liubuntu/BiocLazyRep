@@ -410,10 +410,12 @@ object_size(A3)
 seed(A3)
 ```
 
-All the operations (_delayed_ and _block-processed_) supported on
-DelayedArray objects work on `A3`:
+`A3` being a DelayedArray derivative, all the operations (_delayed_ and
+_block-processed_) supported on DelayedArray objects work on it:
 
 ```{r, }
+is(A3, "DelayedArray")
+
 M4 <- t(log(A3[ , , 1] - 0.5))
 ```
 
