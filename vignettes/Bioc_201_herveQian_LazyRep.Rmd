@@ -30,15 +30,16 @@ options(showHeadLines=3)
 options(showTailLines=3)
 ```
 
+
+
 # Lazy Representations of Very Large Genomic Data Resources in R/Bioconductor
 
-## Instructors and contact information
 
-- **Hervé Pagès**, Fred Hutchinson Cancer Research Center, Seattle, WA
-- **Qian Liu**, Roswell Park Comprehensive Cancer Center, Buffalo, NY
-- **Martin Morgan**, Roswell Park Comprehensive Cancer Center, Buffalo, NY
 
-## Workshop Description
+## About this workshop
+
+
+### Workshop description
 
 In this workshop, we will learn about _Bioconductor_ data containers that
 use lazy data representations and about their application in real data
@@ -48,19 +49,45 @@ to demonstrate the representation and comprehension of large scale
 live demo with completely working examples. Instructions and notes will be
 included.
 
-## Pre-requisites
+
+### Instructors and contact information
+
+- **Hervé Pagès**, Fred Hutchinson Cancer Research Center, Seattle, WA
+- **Qian Liu**, Roswell Park Comprehensive Cancer Center, Buffalo, NY
+- **Martin Morgan**, Roswell Park Comprehensive Cancer Center, Buffalo, NY
+
+
+### Pre-requisites
 
 - Basic knowledge of R syntax (`matrix`, `array`, `data.frame`, etc.)
 - Some familiarity with manipulation of S4 objects in general
 - Some familiarity with `SummarizedExperiment` objects
 
-## Workshop Participation
+
+### Learning objectives
+
+- Introduction to `DelayedArray` objects and related concepts (seed,
+  delayed operations, realization, block-processed operations, in-memory
+  vs on-disk backends, etc...)
+
+- Use `VariantExperiment` to represent your DNA-seq data.
+
+- Statistical analysis of variant data (VCF) using `VariantExperiment`.
+
+- Create `SQLDataFrame` from in-memory data, text format file, and
+  database tables.
+
+- Use `SQLDataFrame` to represent and manipulate orgdb database tables.
+
+
+### Workshop participation
 
 Students will be using their laptops with internet connection, follow
 the instructor to read course materials and run through the working
 code chunks.
 
-## Time outline
+
+### Time outline
 
 | Activity | Time |
 |----------|------|
@@ -72,22 +99,15 @@ code chunks.
 | SQLDataFrame | 10m |
 | Future directions | 5-10m |
 
-## Learning objectives
-- Introduction to `DelayedArray` objects and related concepts (seed,
-  delayed operations, realization, block-processed operations, in-memory
-  vs on-disk backends, etc...)
-- Use `VariantExperiment` to represent your DNA-seq data.
-- Statistical analysis of variant data (VCF) using `VariantExperiment`.
-- Create `SQLDataFrame` from in-memory data, text format file, and database tables.
-- Use `SQLDataFrame` to represent and manipulate orgdb database tables.
 
-##  _R/Bioconductor_ packages
+###  _R/Bioconductor_ packages
 
-to-be-used in this workshop:
+The workshop makes use of the following packages:
 
 ```{r setup, message = FALSE}
 library(DelayedArray)
 library(HDF5Array)
+library(pryr)
 library(DelayedMatrixStats)
 library(SummarizedExperiment)
 library(gdsfmt)
@@ -455,6 +475,22 @@ See the _Implementing A DelayedArray Backend_ vignette from the
 _DelayedArray_ package for more information.
 
 
+### where to learn more and get help
+
+- Don't miss the _Effectively using the DelayedArray framework to support
+  the analysis of large datasets_ workshop by Pete Hickey if you are
+  planning to use DelayedArray objects in your package or if you just
+  want to learn more about DelayedArray objects.
+
+- The _HDF5Array_ and _DelayedArray_ man pages.
+
+- Ask user-oriented questions on our support site: https://support.bioconductor.org
+
+- Ask developer-oriented questions on the bioc-devel mailing list: https://stat.ethz.ch/mailman/listinfo/bioc-devel
+
+- Report bugs and request features on GitHub: https://github.com/Bioconductor/DelayedArray
+
+
 ### Hands-on
 
 1. Load the `airway` dataset (from the _airway_ package).
@@ -493,22 +529,6 @@ _DelayedArray_ package for more information.
     to save a SummarizedExperiment object (HDF5-backed or not) as
     an HDF5-backed SummarizedExperiment object (see
     `?saveHDF5SummarizedExperiment`). Try it.
-
-
-### Learning more and getting help
-
-- Don't miss the _Effectively using the DelayedArray framework to support
-  the analysis of large datasets_ workshop by Pete Hickey if you are
-  planning to use DelayedArray objects in your package or if you just
-  want to learn more about DelayedArray objects.
-
-- The _HDF5Array_ and _DelayedArray_ man pages.
-
-- Ask user-oriented questions on our support site: https://support.bioconductor.org
-
-- Ask developer-oriented questions on the bioc-devel mailing list: https://stat.ethz.ch/mailman/listinfo/bioc-devel
-
-- Report bugs and request features on GitHub: https://github.com/Bioconductor/DelayedArray
 
 
 
