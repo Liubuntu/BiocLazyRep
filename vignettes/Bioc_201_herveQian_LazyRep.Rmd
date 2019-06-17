@@ -72,7 +72,9 @@ code chunks.
 | Future directions | 5-10m |
 
 ## Learning objectives
-- Introduction to `DelayedArray` objects and related concepts (seed, delayed operations, realization, block-processed operations, in-memory vs on-disk backends, etc...)
+- Introduction to `DelayedArray` objects and related concepts (seed,
+  delayed operations, realization, block-processed operations, in-memory
+  vs on-disk backends, etc...)
 - Use `VariantExperiment` to represent your DNA-seq data.
 - Statistical analysis of variant data (VCF) using `VariantExperiment`.
 - Create `SQLDataFrame` from in-memory data, text format file, and database tables.
@@ -105,13 +107,30 @@ library(DBI)
 ## DelayedArray and HDF5Array objects
 
 
+### Motivation and challenges
+
+R ordinary matrices or arrays are not suitable for big datasets.
+
+For example the 10x Genomics dataset (single cell experiment) has
+30,000 rows (genes) and 1.3 million columns (cells). It would
+require 136G of memory to load it in an ordinary integer matrix!
+
+We still want to be able to work with this dataset in R. Ideally,
+manipulation of the dataset in R should be as easy as with an
+ordinary matrix. In particular, we'd like to be able to use things
+like `dim`, `dimnames`, `t`, `[`, `is.na`, `==`, `+`, `log`, `cbind`,
+`max`, `sum`, `colSums`, etc...
+
+
 ### What is a DelayedArray object?
 
 A DelayedArray object is a data structure that can be used to wrap any
-matrix-like or array-like dataset. This wrapping serves 2 purposes:
-(1) it allows to reduce considerably the amount of memory needed to
-perform common matrix or array operations on the dataset, and (2) it
-allows operating on the dataset while treating it as read-only.
+matrix-like or array-like dataset. The dataset will typically be an
+_on disk_ dataset but it can also be an _in memory_ dataset. This
+wrapping serves 2 purposes: (1) it allows to reduce considerably the
+amount of memory needed to perform common matrix or array operations
+on the dataset, and (2) it allows operating on the dataset while
+treating it as read-only.
 
 The DelayedArray class is an S4 class defined in the _DelayedArray_
 package. A simple way to create a DelayedArray object is to call the
@@ -121,11 +140,11 @@ package. A simple way to create a DelayedArray object is to call the
 library(DelayedArray)
 
 m0 <- matrix(1:30, nrow=5)
-M0 <- DelayedArray(m0)
-M0
+M <- DelayedArray(m0)
+M
 
-a <- array(runif(15000000), dim=c(10000, 300, 5))
-A <- DelayedArray(a)
+a0 <- array(runif(15000000), dim=c(10000, 300, 5))
+A <- DelayedArray(a0)
 A
 ```
 
@@ -134,45 +153,46 @@ See `?DelayedArray` for more information about the DelayedArray constructor.
 The matrix-like or array-like object passed to the constructor is called
 the _seed_ of the DelayedArray object.
 
-The seed can be an in-memory dataset (e.g. an ordinary matrix or array, or
-a dgCMatrix object from the _Matrix_ package) or an on-disk dataset (e.g.
-an HDF5 dataset).
+The seed can be an _in-memory_ dataset (e.g. an ordinary matrix or array,
+or a dgCMatrix object from the _Matrix_ package), or an _on-disk_ dataset
+(e.g. an HDF5 dataset).
 
 Here is an example of a DelayedArray object where the seed is an HDF5 dataset:
 
 ```{r, HDF5Array}
 library(HDF5Array)
-A2 <- as(a, "HDF5Array")   # write 'a' to an HDF5 file
-A2
+A0 <- as(a0, "HDF5Array")  # write 'a0' to an HDF5 file
+A0
 ```
 
 An HDF5Array is a particular kind of DelayedArray object:
 
 ```{r}
-is(A2, "DelayedArray")
+is(A0, "DelayedArray")
 ```
 
-`A2`'s memory footprint is very small because the data is on disk:
+`A0`'s memory footprint is very small because the data is on disk:
 
 ```{r}
-object.size(A2)
-object.size(a)
+library(pryr)  # for object_size()
+object_size(A0)
+object_size(a0)
 ```
 
-Think of `A2` as a pointer to the HDF5 dataset. To see where `A2` is pointing
+Think of `A0` as a pointer to the HDF5 dataset. To see where `A0` is pointing
 at, look at its seed:
 
 ```{r}
-seed(A2)                   # an HDF5ArraySeed object
+seed(A0)  # an HDF5ArraySeed object
 ```
 
 DelayedArray objects support many common matrix or array operations:
 
 ```{r}
-A3 <- log(A2 + 1)
-A3
+A1 <- log(A0 + 1)
+A1
 
-sum(A3)
+sum(A1)
 ```
 
 
@@ -182,50 +202,50 @@ Operations on a DelayedArray object are either _delayed_ or _block-processed_.
 
 #### Delayed operations
 
-For example the `+ 1` and `log` operations in `A3 <- log(A2 + 1)` are
+For example the `+ 1` and `log` operations in `A1 <- log(A0 + 1)` are
 _delayed_. This means that they are very fast and produce a new DelayedArray
 object with the same seed as the input object:
 
 ```{r}
-seed(A3)
+seed(A1)
 
-identical(seed(A2), seed(A3))
+identical(seed(A0), seed(A1))
 ```
 
-Note that `A3`'s memory footprint is still very small because all the data
-is still on disk:
+Note that `A1`'s memory footprint is still very small because the dataset
+remains on disk:
 ```{r}
-object.size(A3)
+object_size(A1)
 
-showtree(A3)
+showtree(A1)
 ```
 
-The only difference between `A2` and `A3` is that `A3` now carries _delayed_
-operations.
+The only difference between `A0` and `A1` is that `A1` now carries _delayed
+operations_.
 
 We could keep going:
 
 ```{r}
-M <- t(A3[ , 1:20, 5])
-M
+M2 <- t(A1[ , 1:20, 5])
+M2
 ```
 
-The seed is still the same. This only adds more _delayed_ operations to be
+The seed is still the same. This only adds more _delayed operations_ to be
 applied to it:
 
 ```{r}
-seed(M)
+seed(M2)
 
-object.size(M)
+object_size(M2)
 
-showtree(M)
+showtree(M2)
 ```
 
 An important principle: The seed of a DelayedArray object is **always**
 treated as a _read-only_ object so will never be modified by the operations
 we perform on the object.
 
-Summary of _delayed_ operations supported on DelayedArray objects:
+Summary of _delayed operations_ supported on DelayedArray objects:
 
 | Operations | Note |
 |------------|------|
@@ -233,8 +253,11 @@ Summary of _delayed_ operations supported on DelayedArray objects:
 | `t`, `aperm` | |
 | `rbind`, `cbind` |  |
 | `sweep` | |
-| All the members of the `Ops` group | e.g. `+`, `-`, `==`, `<`, etc... |
-| All the members of the `Math` and `Math2` groups | e.g. `log`, `floor`, etc... |
+| Members of the `Arith` group | e.g. `+`, `-`, `*`, etc... |
+| Members of the `Compare` group | e.g. `==`, `<=`, `<`, etc... |
+| Members of the `Logic` group | `&`, `|` |
+| Some members of the `Math` group | e.g. `log`, `floor`, etc... |
+| Members of the `Math2` group | `round`, `signif` |
 | `is.na`, `is.finite`, `is.infinite`, `is.nan` | |
 | `pmax2` and `pmin2` | replacements for `base::pmax` and `base::pmin` |
 | `dnorm`, `pnorm`, `qnorm` | The Normal Distribution |
@@ -248,70 +271,81 @@ Summary of _delayed_ operations supported on DelayedArray objects:
 #### Realization
 
 To _realize_ a DelayedArray object (i.e. to trigger execution of the
-delayed operations carried by the object) one can call `as.array` on it.
+_delayed operations_ carried by the object) one can call `as.array` on it.
 
 ```{r, as.array}
-m <- as.array(M)  # in-memory realization
+m <- as.array(M2)  # in-memory realization
 ```
 
 Note that `as.array()` returns an ordinary array which means that the
 DelayedArray object is realized _in memory_. This could require too much
 memory if the object is big. A big DelayedArray object is preferrably
 realized _on disk_ for example by calling `writeHDF5Array` on it (this
-function is defined in the HDF5Array package):
+function is defined in the _HDF5Array_ package):
 
 ```{r, writeHDF5Array}
-M2 <- writeHDF5Array(M)  # on-disk realization
-M2
+M3 <- writeHDF5Array(M2)  # on-disk realization
+M3
 ```
 
-Coercion to HDF5Array can also be used:
+Coercion to HDF5Array can also be used to realize the object:
 
 ```{r, coercion-to-HDF5Array}
-M2 <- as(M, "HDF5Array")  # equivalent to writeHDF5Array(M)
+M3 <- as(M2, "HDF5Array")  # equivalent to writeHDF5Array(M2)
 ```
 
 Other on-disk backends can be supported.
 
-On-disk realization uses a _block processing_ strategy where the blocks
-are realized in memory and written to disk one at a time. See
-`?writeHDF5Array` in the HDF5Array package for more information.
+On-disk realization uses a _block processing_ mechanism where the
+blocks are realized in memory and written to disk one at a time.
+This allows realization of HDF5 datasets that don't fit in memory.
+See `?writeHDF5Array` in the _HDF5Array_ package for more information.
 
 #### Block-processed operations
 
-When operations are not _delayed_ they are _block-processed_.
+When operations are not _delayed_ they are _block-processed_ i.e.
+yhey are implemented via a _block processing_ mechanism that loads
+and processes one block at a time.
 
-TODO (by Hervé): expand this
+```{r, mean}
+mean(A0)  # same as mean(a0)
+```
+
+To see the _block processing_ mechanism in action we make it verbose:
+
+```{r, set_verbose_block_processing}
+DelayedArray:::set_verbose_block_processing(TRUE)
+mean(A0)
+```
+
+The size and other aspects of the blocks can be controlled. See
+`?setAutoBlockSize` for more information.
 
 Summary of _block-processed_ operations supported on DelayedArray objects:
 
 | Operations | Note |
 |------------|------|
 | `x[i]` | _Linear_ single bracket subsetting |
-| `anyNA`, `which` | |
-| `unique`, `table` | |
-| All the members of the `Summary` group | e.g. `max`, `sum`, `all`, etc... |
+| Members of the `Summary` group | e.g. `max`, `sum`, `all`, etc... |
 | `mean` | |
-| `apply` | |
+| `anyNA`, `which` | |
 | `row/colSums`, `row/colMeans` | Base row/col summarization |
 | `row/colMaxs`, `row/colProds`, etc... | Extended row/col summarization |
 | `rowsum`, `colsum` | |
+| `unique`, `table` | |
+| `apply` | |
 
 Note: the _Extended row/col summarization_ functions are defined in the
-matrixStats package and the methods for DelayedMatrix objects are implemented
-in the [DelayedMatrixStats package](https://bioconductor.org/packages/DelayedMatrixStats).
-
-
-### In-memory vs on-disk objects
-
-TODO (by Hervé)
+_matrixStats_ package and the methods for DelayedMatrix objects are
+implemented in the
+[DelayedMatrixStats package](https://bioconductor.org/packages/DelayedMatrixStats).
 
 
 ### HDF5 backend
 
 TODO (by Hervé)
-- `path(A2)`
-- `h5ls(path(A2))`
+- `path(A0)`
+- `h5ls(path(A0))`
 
 
 ### Using DelayedArray objects in a SummarizedExperiment object
