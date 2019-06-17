@@ -120,9 +120,9 @@ package. A simple way to create a DelayedArray object is to call the
 ```{r, DelayedArray}
 library(DelayedArray)
 
-m <- matrix(1:30, nrow=5)
-M <- DelayedArray(m)
-M
+m0 <- matrix(1:30, nrow=5)
+M0 <- DelayedArray(m0)
+M0
 
 a <- array(runif(15000000), dim=c(10000, 300, 5))
 A <- DelayedArray(a)
@@ -247,7 +247,35 @@ Summary of _delayed_ operations supported on DelayedArray objects:
 
 #### Realization
 
-TODO (by Hervé)
+To _realize_ a DelayedArray object (i.e. to trigger execution of the
+delayed operations carried by the object) one can call `as.array` on it.
+
+```{r, as.array}
+m <- as.array(M)  # in-memory realization
+```
+
+Note that `as.array()` returns an ordinary array which means that the
+DelayedArray object is realized _in memory_. This could require too much
+memory if the object is big. A big DelayedArray object is preferrably
+realized _on disk_ for example by calling `writeHDF5Array` on it (this
+function is defined in the HDF5Array package):
+
+```{r, writeHDF5Array}
+M2 <- writeHDF5Array(M)  # on-disk realization
+M2
+```
+
+Coercion to HDF5Array can also be used:
+
+```{r, coercion-to-HDF5Array}
+M2 <- as(M, "HDF5Array")  # equivalent to writeHDF5Array(M)
+```
+
+Other on-disk backends can be supported.
+
+On-disk realization uses a _block processing_ strategy where the blocks
+are realized in memory and written to disk one at a time. See
+`?writeHDF5Array` in the HDF5Array package for more information.
 
 #### Block-processed operations
 
