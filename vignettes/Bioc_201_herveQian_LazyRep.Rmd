@@ -433,13 +433,20 @@ _DelayedArray_ package for more information.
     `?saveHDF5SummarizedExperiment`). Try it.
 
 
-### Conclusion
+### Learning more and getting help
 
-TODO (by Hervé)
+- Don't miss the `Effectively using the DelayedArray framework to support
+  the analysis of large datasets` workshop by Pete Hickey if you are
+  planning to use DelayedArray objects in your package or if you just
+  want to learn about DelayedArray objects.
 
-- Don't miss the "Effectively using the DelayedArray framework to support
-  the analysis of large datasets" workshop by Pete Hickey if you are
-  planning to use DelayedArray objects in your package.
+- The _HDF5Array_ and _DelayedArray_ man pages.
+
+- Ask user-oriented questions on our support site: https://support.bioconductor.org
+
+- Ask developer-oriented questions on the bioc-devel mailing list: https://stat.ethz.ch/mailman/listinfo/bioc-devel
+
+- Report bugs and request features on GitHub: https://github.com/Bioconductor/DelayedArray
 
 
 
