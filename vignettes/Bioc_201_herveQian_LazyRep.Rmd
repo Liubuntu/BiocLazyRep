@@ -76,7 +76,7 @@ code chunks.
 - Use `VariantExperiment` to represent your DNA-seq data.
 - Statistical analysis of variant data (VCF) using `VariantExperiment`.
 - Create `SQLDataFrame` from in-memory data, text format file, and database tables.
-- Use `SQLDataFrame` to represent and manipulate godb database tables.
+- Use `SQLDataFrame` to represent and manipulate orgdb database tables.
 
 ##  _R/Bioconductor_ packages
 
@@ -586,7 +586,7 @@ log(ds+5)
 
 
 
-## VariantExperiment container for lazy infrastructures
+## VariantExperiment: container for lazy infrastructures
 
 ### Introduction
 [VariantExperiment][] is a _Bioconductor_ package that directly
@@ -854,7 +854,7 @@ countSingletons(ve)
 ```
 
 
-## DelayedDataFrame for delayed representation of metadata
+## DelayedDataFrame: lazy representation of metadata
 
 ### Introduction
 
@@ -1025,7 +1025,7 @@ lazyIndex(ddfcb)
 
 
 
-## SQLDataFrame
+## SQLDataFrame: lazy DataFrame with SQL database backend
 ### Introduction
 
 A database is an organized collection of data. Relational databases is
@@ -1072,7 +1072,7 @@ side, with '|' separating key column(s) with the other columns. The
 apply to the non-key-columns.
 
 
-```{r loadOrgdb, message=FALSE}
+```{r loadOrgdb, eval=FALSE}
 org.Hs.eg()
 ```
 
