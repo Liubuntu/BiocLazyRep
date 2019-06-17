@@ -535,7 +535,7 @@ _DelayedArray_ package for more information.
 ## Specialized DelayedArray backends
 
 
-### Extension of DelayedArray with GDS backend
+### GDSArray: A DelayedArray extension for GDS data
 
 #### CoreArray and Genomic Data Structure
 
@@ -696,7 +696,7 @@ infrastructure and methods.
 
 
 
-### Extension of `DelayedArray` with VCF backend
+### VCFArray: A DelayedArray extension for VCF data
 
 
 #### Introduction
