@@ -435,10 +435,10 @@ _DelayedArray_ package for more information.
 
 ### Learning more and getting help
 
-- Don't miss the `Effectively using the DelayedArray framework to support
-  the analysis of large datasets` workshop by Pete Hickey if you are
+- Don't miss the _Effectively using the DelayedArray framework to support
+  the analysis of large datasets_ workshop by Pete Hickey if you are
   planning to use DelayedArray objects in your package or if you just
-  want to learn about DelayedArray objects.
+  want to learn more about DelayedArray objects.
 
 - The _HDF5Array_ and _DelayedArray_ man pages.
 
