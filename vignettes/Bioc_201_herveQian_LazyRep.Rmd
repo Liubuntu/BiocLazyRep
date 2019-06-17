@@ -475,7 +475,7 @@ See the _Implementing A DelayedArray Backend_ vignette from the
 _DelayedArray_ package for more information.
 
 
-### where to learn more and get help
+### Where to learn more and get help
 
 - Don't miss the _Effectively using the DelayedArray framework to support
   the analysis of large datasets_ workshop by Pete Hickey if you are
@@ -1560,4 +1560,26 @@ resects.
 head(ROWNAMES(res))
 res[sample(ROWNAMES(res), 5), ]
 ```
+
+
+
+## Future directions
+
+- DelayedArray is still a work-in-progress (we need more efficient
+  block-processing and RleArray objects).
+
+- Support other on-disk DelayedArray backends (TileDB?)
+
+- Explore other on-disk DataFrame-like objects.
+
+- DataFrame-like classes like SQLDataFrame don't extend DataFrame at
+  the moment:
+
+    ```{r}
+    showClass("SQLDataFrame")
+    ```
+
+    This prevents these objects from being used to store the metadata
+    columns of Vector derivatives.
+
 
