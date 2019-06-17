@@ -215,14 +215,28 @@ identical(seed(A0), seed(A1))
 
 Note that `A1`'s memory footprint is still very small because the dataset
 remains on disk:
+
 ```{r}
 object_size(A1)
 
 showtree(A1)
 ```
 
-The only difference between `A0` and `A1` is that `A1` now carries _delayed
+One difference between `A0` and `A1` is that `A1` now carries _delayed
 operations_.
+
+Another important difference is that `A1` is no longer an HDF5Array instance.
+It is now a DelayedArray instance:
+
+```{r, class_A0_vs_class_A1}
+class(A0)
+
+class(A1)
+```
+
+This is an important property of _delayed operations_: they will demote
+any specialized DelayedArray object to a DelayedArray or DelayedMatrix
+instance.
 
 We could keep going:
 
@@ -272,7 +286,7 @@ Summary of _delayed operations_ supported on DelayedArray objects:
 #### Realization
 
 To _realize_ a DelayedArray object (i.e. to trigger execution of the
-_delayed operations_ carried by the object) one can call `as.array` on it.
+_delayed operations_ carried by the object) one can call `as.array` on it:
 
 ```{r, as.array}
 m <- as.array(M2)  # in-memory realization
@@ -306,7 +320,7 @@ See `?writeHDF5Array` in the _HDF5Array_ package for more information.
 
 When operations are not _delayed_ they are _block-processed_ i.e.
 yhey are implemented via a _block processing_ mechanism that loads
-and processes one block at a time.
+and processes one block at a time. For example:
 
 ```{r, mean}
 mean(A0)  # same as mean(a0)
@@ -342,14 +356,62 @@ implemented in the
 [DelayedMatrixStats package](https://bioconductor.org/packages/DelayedMatrixStats).
 
 
-### On-disk backend vs in-memory backend
+### On-disk vs in-memory backend
 
-TODO (by Hervé)
-On-disk backend: e.g. HDF5Array objects
-- `path(A0)`
-- `h5ls(path(A0))`
+DelayedArray subclasses can be defined to implement specific
+backends. For example HDF5Array is a DelayedArray subclass that implements
+a DelayedArray backend for HDF5 datasets. Other backends are available
+e.g. GDSArray and VCFArray are DelayedArray subclasses that implement
+backends for GDS and VCF files, respectively. (They will be covered in
+details later in this workshop).
 
-In-memory backend: e.g. RleArray objects
+Note that all the above backends are _on-disk backends_.
+
+The DelayedArray framework also supports _in-memory backends_.
+For example RleArray is a DelayedArray subclass that implements a
+backend where the array data resides in memory and is in RLE form
+to reduce its memory footprint. The RleArray class and its constructor
+function are implemented in the _DelayedArray_ package:
+
+```{r, RleArray}
+data <- Rle(sample(6L, 500000, replace=TRUE), 8)
+data
+
+## `data` gets expanded (array() calls as.vector() on it):
+a3 <- array(data, dim=c(50, 20, 4000))
+
+## `data` does NOT get expanded (i.e. it remains in RLE form):
+A3 <- RleArray(data, dim=c(50, 20, 4000))
+A3
+
+object_size(a3)
+object_size(A3)
+
+seed(A3)
+```
+
+All the operations (_delayed_ and _block-processed_) supported on
+DelayedArray objects work on `A3`:
+
+```{r, }
+M4 <- t(log(A3[ , , 1] - 0.5))
+```
+
+Note that `M4` is no longer an RleArray instance:
+
+```{r, class_A3_vs_class_M4}
+class(A3)
+
+class(M4)
+```
+
+`M4` can be realized as an ordinary matrix or as an HDF5Matrix object:
+
+```{r}
+a4 <- as.matrix(M4)   # same as as.array(M4)
+
+as(M4, "HDF5Matrix")  # same as as(M4, "HDF5Array")
+```
 
 
 ### Implementing a DelayedArray backend
@@ -381,7 +443,7 @@ constructor needs to support so this is called _the seed contract_.
 
 In other words the `DelayedArray()` constructor will work and return
 a valid DelayedArray object on any seed that supports _the seed contract_.
-Then all the operations (_delayed_ and `block-processed`) supported on
+Then all the operations (_delayed_ and _block-processed_) supported on
 DelayedArray objects will work out-of-the-box on the returned object.
 
 Therefore implementing a new DelayedArray backend is just a matter
@@ -451,7 +513,6 @@ _DelayedArray_ package for more information.
 
 
 ## Specialized DelayedArray backends
-
 
 
 ### Extension of DelayedArray with GDS backend
