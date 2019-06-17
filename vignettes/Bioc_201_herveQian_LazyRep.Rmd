@@ -352,14 +352,45 @@ On-disk backend: e.g. HDF5Array objects
 In-memory backend: e.g. RleArray objects
 
 
-### Using DelayedArray objects in a SummarizedExperiment object
-
-TODO (by Hervé)
-
-
 ### Implementing a DelayedArray backend
 
-TODO (by Hervé)
+The DelayedArray framework currently supports a small number of on-disk
+backends: HDF5 (via the _HDF5Array_ package), GDS (via the _GDSArray_
+package), and VCF (via the _VCFArray_ package). This can be extended
+to support other on-disk backends. In theory, it should be possible to
+implement a DelayedArray backend for any file format that has the
+capability to store array data with fast random access.
+
+The process of implementing a DelayedArray backend is documented in the
+_Implementing A DelayedArray Backend_ vignette from the _DelayedArray_
+package. The lastest version of this document is always available at
+https://bioconductor.org/packages/devel/DelayedArray
+
+The DelayedArray framework has been designed to make this process as
+simple as possible. In particular the number of methods that the
+developer needs to implement to support a particular backend has been
+kept to a strict minimum of 3 methods: `dim()`, `dimnames()`, and
+`extract_array()`.
+
+`extract_array` is a generic function defined in the _DelayedArray_
+package. It is not intended to be used directly by the end user.
+
+Note that supporting `dim()`, `dimnames()`, and `extract_array()`
+is the only thing that the seed supplied to the `DelayedArray()`
+constructor needs to support so this is called _the seed contract_.
+
+In other words the `DelayedArray()` constructor will work and return
+a valid DelayedArray object on any seed that supports _the seed contract_.
+Then all the operations (_delayed_ and `block-processed`) supported on
+DelayedArray objects will work out-of-the-box on the returned object.
+
+Therefore implementing a new DelayedArray backend is just a matter
+of implementing a new type of seed that complies with _the seed contract_.
+And because _the seed contract_ contract is simple and minimalist,
+this process is actually more straightforward than it might sound.
+
+See the _Implementing A DelayedArray Backend_ vignette from the
+_DelayedArray_ package for more information.
 
 
 ### Hands-on
