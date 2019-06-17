@@ -64,7 +64,8 @@ code chunks.
 
 | Activity | Time |
 |----------|------|
-| DelayedArray and HDF5Array objects | 40m |
+| DelayedArray and HDF5Array objects | 30m |
+| DelayedArray and HDF5Array hands-on | 10m |
 | Specialized DelayedArray backends | 10m |
 | VariantExperiment | 20m |
 | DelayedDataFrame | 10m |
@@ -341,11 +342,14 @@ implemented in the
 [DelayedMatrixStats package](https://bioconductor.org/packages/DelayedMatrixStats).
 
 
-### HDF5 backend
+### On-disk backend vs in-memory backend
 
 TODO (by Hervé)
+On-disk backend: e.g. HDF5Array objects
 - `path(A0)`
 - `h5ls(path(A0))`
+
+In-memory backend: e.g. RleArray objects
 
 
 ### Using DelayedArray objects in a SummarizedExperiment object
@@ -356,6 +360,46 @@ TODO (by Hervé)
 ### Implementing a DelayedArray backend
 
 TODO (by Hervé)
+
+
+### Hands-on
+
+1. Load the `airway` dataset (from the _airway_ package).
+
+2. The dataset is wrapped in a SummarizedExperiment object.
+   Get the count data as an ordinary matrix.
+
+3. Turn the matrix of counts into an HDF5Matrix object: first
+   using `writeHDF5Array`, then using coercion.
+
+4. When using coercion, where has the data been written on disk?
+
+5. See `?setHDF5DumpFile` for how to control the location of
+   "automatic" HDF5 datasets. Try to control the destination of
+   the data when coercing.
+
+6. Use `showHDF5DumpLog()` to see all the HDF5 datasets written to
+   disk during the current session.
+
+7. Try some operations on the HDF5Matrix object: some delayed ones and
+   some non-delayed ones (block-processed).
+
+8. Use `DelayedArray:::set_verbose_block_processing(TRUE)` to see
+   block processing in action.
+
+9. Change the block size with `setAutoBlockSize()`.
+
+10. Stick the HDF5Matrix object back in the SummarizedExperiment object.
+    The resulting object is an "HDF5-backed SummarizedExperiment object".
+
+11. The HDF5-backed SummarizedExperiment object can be manipulated
+    (almost) like an in-memory SummarizedExperiment object.
+    Try `[`, `cbind`, `rbind` on it.
+
+12. The _HDF5Array_ package provides `saveHDF5SummarizedExperiment()`
+    to save a SummarizedExperiment object (HDF5-backed or not) as
+    an HDF5-backed SummarizedExperiment object (see
+    `?saveHDF5SummarizedExperiment`). Try it.
 
 
 ### Conclusion
