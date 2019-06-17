@@ -1171,7 +1171,7 @@ ddf2 <- ddf[21:40, ]
 (ddfcb <- cbind(varid = ddf[,2, drop=FALSE], AA=ddf[, 3, drop=FALSE]))
 ```
 
-### DEVELOPERS ONLY
+### The DelayedDataFrame internals (for developers only)
 
 - lazyIndex slot
 
@@ -1470,7 +1470,7 @@ geneids
 res <- inner_join(geneids, txinfo)
 ```
 
-### DEVELOPERS ONLY
+### The SQLDataFrame internals (for developers only)
 
 To make the SQLDataFrame object as light and compact as possible,
 there are only 5 slots contained in the object: tblData, dbkey,
@@ -1586,15 +1586,14 @@ res[sample(ROWNAMES(res), 5), ]
 
 ### On-disk DataFrame
 
-- Explore other on-disk DataFrame-like objects (Spark?)
+- Explore other backends for on-disk DataFrame-like objects (Spark?)
 
-- DataFrame-like classes like SQLDataFrame don't extend DataFrame at
-  the moment:
+- SQLDataFrame don't extend DataFrame at the moment:
 
     ```{r}
     showClass("SQLDataFrame")
     ```
 
-    This prevents these objects from being used to store the metadata
-    columns of Vector derivatives.
+    This prevents these objects (and other future DataFrame-like objects)
+    from being used to store the metadata columns of a Vector derivative.
 
