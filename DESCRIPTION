@@ -6,10 +6,11 @@ Version: 3.9.1
 Description: Lazy representation of very large genomic Data resources in R/Bioconductor
 Authors@R: c(
     person("Qian", "Liu", email = "qian.liu@roswellpark.org", role = c("aut", "cre")),
-    person("Hervé", " Pagès", email = "hpages@fredhutch.org", role = c("aut")))
+    person("Hervé", " Pagès", email = "hpages@fredhutch.org", role = c("aut")),
+    person("Martin", " Morgan", email = "martin.morgan@roswellpark.org", role = c("aut")))
 License: GPL-3
 Depends: R (>= 3.6.0), R (< 3.7.0)
-Imports: DelayedArray, HDF5Array, pryr, DelayedMatrixStats, SummarizedExperiment, airway, SeqArray, GDSArray, VCFArray, DelayedDataFrame, SQLDataFrame, VariantAnnotation
+Imports: DelayedArray, HDF5Array, pryr, DelayedMatrixStats, SummarizedExperiment, airway, SeqArray, GDSArray, VCFArray, DelayedDataFrame, SQLDataFrame, VariantAnnotation, org.Hs.eg.db, TxDb.Hsapiens.UCSC.hg38.knownGene, DBI
 SystemRequirements: https://github.com/Bioconductor/VariantExperiment
 Remotes: rstudio/bookdown
 Suggests: 
