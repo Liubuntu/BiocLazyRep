@@ -654,8 +654,7 @@ gf$annotation$info
 gf$annotation$info$AC
 ```
 Try typing in `gf$ann` and pressing tab key for the
-auto-completion. (Changes made in GDSArray, wait for new build
-tomorrow June 7th.)
+auto-completion.
 
 `gdsfile()` function returns the file path of the corresponding GDS
   file.

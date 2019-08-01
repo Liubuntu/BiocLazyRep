@@ -1,9 +1,9 @@
-Package: BiocWorkshops2019
+Package: BiocLazyRep
 Type: Package
 Encoding: UTF-8
 Title: Bioconductor 2019 Conference Workshops
-Version: 3.9.1
-Description: Lazy representation of very large genomic Data resources in R/Bioconductor
+Version: 0.0.2
+Description: Lazy representation of very large genomic Data resources in R/Bioconductor.
 Authors@R: c(
     person("Qian", "Liu", email = "qian.liu@roswellpark.org", role = c("aut", "cre")),
     person("Hervé", " Pagès", email = "hpages@fredhutch.org", role = c("aut")),
