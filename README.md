@@ -1,3 +1,14 @@
+### Workshop description
+
+In this workshop, we will learn about _Bioconductor_ data containers that
+use lazy data representations and about their application in real data
+analysis. We will use some real data examples generated from DNA/RNA-seq,
+to demonstrate the representation and comprehension of large scale
+(out-of-memory) genomic datasets. The workshop will be mainly instructor-led
+live demo with completely working examples. Instructions and notes will be
+included.
+
+
 ### Instructors and contact information
 
 - **Hervé Pagès**, Fred Hutchinson Cancer Research Center, Seattle, WA
